@@ -1,0 +1,2419 @@
+[
+  {
+    "url": "https://shmmoscow.ru/antitsellyulitnyj-massazh-v-domashnih-usloviyah/",
+    "slug": "antitsellyulitnyj-massazh-v-domashnih-usloviyah",
+    "id": 36542,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/azot-v-massazhe-i-kosmetologii-novye-gorizonty-v-uhode-za-kozhej-i-telom/",
+    "slug": "azot-v-massazhe-i-kosmetologii-novye-gorizonty-v-uhode-za-kozhej-i-telom",
+    "id": 33356,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/domashnij-uhod-za-kozhej-litsa-sekrety-i-sovety/",
+    "slug": "domashnij-uhod-za-kozhej-litsa-sekrety-i-sovety",
+    "id": 33387,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-blefaroliftu/",
+    "slug": "obuchenie-blefaroliftu",
+    "id": 13171,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-esteticheskoj-kosmetologii/",
+    "slug": "obuchenie-esteticheskoj-kosmetologii",
+    "id": 12572,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/primery-testov-dlya-otsenki-sostoyaniya-kozhi/",
+    "slug": "primery-testov-dlya-otsenki-sostoyaniya-kozhi",
+    "id": 34099,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/10-oshibok-nachinayushhih-massazhistov-kak-izbezhat/",
+    "slug": "10-oshibok-nachinayushhih-massazhistov-kak-izbezhat",
+    "id": 34394,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-klientami-s-ozhireniem/",
+    "slug": "massazh-klientami-s-ozhireniem",
+    "id": "",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-ne-boyatsya-govorit-tsenu-za-massazh/",
+    "slug": "kak-ne-boyatsya-govorit-tsenu-za-massazh",
+    "id": 30979,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/banochnyj-massazh-istselyayushhaya-sila-vakuumnoj-terapii/",
+    "slug": "banochnyj-massazh-istselyayushhaya-sila-vakuumnoj-terapii",
+    "id": 33375,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-delat-limfodrenazhnyj-massazh-v-domashnih-usloviyah/",
+    "slug": "kak-delat-limfodrenazhnyj-massazh-v-domashnih-usloviyah",
+    "id": 33475,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kurs-limfodrenazhnyj-massazh-litsa/",
+    "slug": "kurs-limfodrenazhnyj-massazh-litsa",
+    "id": 11013,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-antitsellyulitnogo-massazha/",
+    "slug": "kursy-antitsellyulitnogo-massazha",
+    "id": 985,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-limfodrenazhnogo-massazha/",
+    "slug": "kursy-limfodrenazhnogo-massazha",
+    "id": 1574,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/limfodrenazhnyj-massazh-litsa-drainage-fix/",
+    "slug": "limfodrenazhnyj-massazh-litsa-drainage-fix",
+    "id": 29673,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/limfodrenazhnyj-massazh-tehnika-osobennosti-rezultaty/",
+    "slug": "limfodrenazhnyj-massazh-tehnika-osobennosti-rezultaty",
+    "id": 34409,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/miofastsialnyj-reliz-stop-s-ispolzovaniem-myachika-poshagovaya-instruktsiya/",
+    "slug": "miofastsialnyj-reliz-stop-s-ispolzovaniem-myachika-poshagovaya-instruktsiya",
+    "id": 32261,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/reflektornyj-massazh-stop-zony-proektsii-i-ih-vliyanie-na-vnutrennie-organy/",
+    "slug": "reflektornyj-massazh-stop-zony-proektsii-i-ih-vliyanie-na-vnutrennie-organy",
+    "id": 33219,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/10-rasprostranennyh-oshibok-nachinayushhih-massazhistov-i-kak-ih-izbezhat/",
+    "slug": "10-rasprostranennyh-oshibok-nachinayushhih-massazhistov-i-kak-ih-izbezhat",
+    "id": 35412,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/sem-zapovedej-bogatogo-massazhista/",
+    "slug": "sem-zapovedej-bogatogo-massazhista",
+    "id": 32800,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-nog-pri-ploskostopii-vidy-i-tehniki/",
+    "slug": "massazh-nog-pri-ploskostopii-vidy-i-tehniki",
+    "id": 34328,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-reflektorno-ortopedicheskomu-massazhu-stop-i-goleni/",
+    "slug": "obuchenie-reflektorno-ortopedicheskomu-massazhu-stop-i-goleni",
+    "id": 17615,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/reflektornye-zony-na-stopah-i-ih-znachenie/",
+    "slug": "reflektornye-zony-na-stopah-i-ih-znachenie",
+    "id": 34422,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/reflektornyj-massazh-stop/",
+    "slug": "reflektornyj-massazh-stop",
+    "id": 173,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/5-luchshih-massazhnyh-tehnik-dlya-oblegcheniya-bolej-v-spine/",
+    "slug": "5-luchshih-massazhnyh-tehnik-dlya-oblegcheniya-bolej-v-spine",
+    "id": 34443,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-pri-bolyah-v-spine-kakie-tehniki-dejstvitelno-rabotayut/",
+    "slug": "massazh-pri-bolyah-v-spine-kakie-tehniki-dejstvitelno-rabotayut",
+    "id": 34891,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-pri-osteohondroze-kak-umenshit-bol-v-spine-i-shee-s-pomoshhyu-effektivnyh-metodov/",
+    "slug": "massazh-pri-osteohondroze-kak-umenshit-bol-v-spine-i-shee-s-pomoshhyu-effektivnyh-metodov",
+    "id": 34068,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-shei-pomoshh-pri-osteohondroze-i-napryazhenii/",
+    "slug": "massazh-shei-pomoshh-pri-osteohondroze-i-napryazhenii",
+    "id": 34278,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/effektivnye-metody-manualnoj-terapii-pri-golovnoj-boli-i-problemah-v-shejnom-otdele/",
+    "slug": "effektivnye-metody-manualnoj-terapii-pri-golovnoj-boli-i-problemah-v-shejnom-otdele",
+    "id": 30787,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/effektnye-i-bezopasnye-metody-manualnoj-terapii-poyasnichnyj-otdel-krestets-taz/",
+    "slug": "effektnye-i-bezopasnye-metody-manualnoj-terapii-poyasnichnyj-otdel-krestets-taz",
+    "id": 30796,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/ergonomika-rabochego-mesta-massazhista-kak-sohranit-zdorove-pri-intensivnoj-rabote/",
+    "slug": "ergonomika-rabochego-mesta-massazhista-kak-sohranit-zdorove-pri-intensivnoj-rabote",
+    "id": 35438,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-massazh-mozhet-pomoch-pri-migreni-i-golovnyh-bolyah/",
+    "slug": "kak-massazh-mozhet-pomoch-pri-migreni-i-golovnyh-bolyah",
+    "id": 34602,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kakoj-massazh-bolshe-vsego-podhodit-dlya-snyatiya-ofisnogo-napryazheniya/",
+    "slug": "kakoj-massazh-bolshe-vsego-podhodit-dlya-snyatiya-ofisnogo-napryazheniya",
+    "id": 31372,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-dlya-ofisnyh-rabotnikov-kak-spravitsya-s-napryazheniem/",
+    "slug": "massazh-dlya-ofisnyh-rabotnikov-kak-spravitsya-s-napryazheniem",
+    "id": 34594,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-shejno-vorotnikovoj-zony-2/",
+    "slug": "massazh-shejno-vorotnikovoj-zony-2",
+    "id": 34244,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-shejno-vorotnikovoj-zony-vash-put-k-zdorovyu-i-komfortu/",
+    "slug": "massazh-shejno-vorotnikovoj-zony-vash-put-k-zdorovyu-i-komfortu",
+    "id": 33328,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/privychka-kotoraya-vliyaet-na-vashe-zdorove-skreshhivanie-nog-pod-stolom/",
+    "slug": "privychka-kotoraya-vliyaet-na-vashe-zdorove-skreshhivanie-nog-pod-stolom",
+    "id": 32826,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/skolioz-u-detej-prichiny-simptomy-i-metody-lecheniya/",
+    "slug": "skolioz-u-detej-prichiny-simptomy-i-metody-lecheniya",
+    "id": 33322,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/snyatie-migreni-i-golovnyh-bolej-s-pomoshhyu-massazha-proverennye-metody/",
+    "slug": "snyatie-migreni-i-golovnyh-bolej-s-pomoshhyu-massazha-proverennye-metody",
+    "id": 35228,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/akusticheskoe-puteshestvie-master-klass-po-vibroakusticheskoj-terapii-dlya-razuma-dushi-i-tela/",
+    "slug": "akusticheskoe-puteshestvie-master-klass-po-vibroakusticheskoj-terapii-dlya-razuma-dushi-i-tela",
+    "id": 31631,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/aromaterapiya-i-massazh-kak-efirnye-masla-usilivayut-effekt-protsedury/",
+    "slug": "aromaterapiya-i-massazh-kak-efirnye-masla-usilivayut-effekt-protsedury",
+    "id": 33567,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/birmanskij-relaks-massazh-golovy/",
+    "slug": "birmanskij-relaks-massazh-golovy",
+    "id": 29667,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-ayurvedicheskogo-massazha/",
+    "slug": "kursy-ayurvedicheskogo-massazha",
+    "id": 30722,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-obucheniya-gavajskomu-massazhu/",
+    "slug": "kursy-obucheniya-gavajskomu-massazhu",
+    "id": 7363,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-stoun-massazha-stounterapiya/",
+    "slug": "kursy-stoun-massazha-stounterapiya",
+    "id": 1621,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/master-klass-s-efirnymi-maslami-doterra-i-demonstratsiej-tehniki-aroma-touch-massage/",
+    "slug": "master-klass-s-efirnymi-maslami-doterra-i-demonstratsiej-tehniki-aroma-touch-massage",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-rasslablyayushhemu-massazhu/",
+    "slug": "obuchenie-rasslablyayushhemu-massazhu",
+    "id": 18359,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/miofastsialnyj-massazh-osnovy-i-praktika-dlya-professionalov/",
+    "slug": "miofastsialnyj-massazh-osnovy-i-praktika-dlya-professionalov",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/detskij-massazh-zabota-i-razvitie-cherez-nezhnye-prikosnoveniya/",
+    "slug": "detskij-massazh-zabota-i-razvitie-cherez-nezhnye-prikosnoveniya",
+    "id": 33775,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/detskij-massazh-zabota-o-zdorove-i-garmonii-vashego-malysha/",
+    "slug": "detskij-massazh-zabota-o-zdorove-i-garmonii-vashego-malysha",
+    "id": 32410,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/detskij-ozdorovitelnyj-massazh-poleznye-priemy-dlya-detej-ot-1-do-7-let/",
+    "slug": "detskij-ozdorovitelnyj-massazh-poleznye-priemy-dlya-detej-ot-1-do-7-let",
+    "id": 33594,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-obucheniya-detskomu-massazhu/",
+    "slug": "kursy-obucheniya-detskomu-massazhu",
+    "id": 2019,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-dlya-detej-kogda-i-kak-nachinat-osnovnye-metodiki/",
+    "slug": "massazh-dlya-detej-kogda-i-kak-nachinat-osnovnye-metodiki",
+    "id": 35431,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-dlya-detej-polza-i-rekomendatsii-dlya-roditelej/",
+    "slug": "massazh-dlya-detej-polza-i-rekomendatsii-dlya-roditelej",
+    "id": 34507,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-dlya-detej-s-giperaktivnostyu-i-sdvg-kak-snizit-uroven-trevozhnosti/",
+    "slug": "massazh-dlya-detej-s-giperaktivnostyu-i-sdvg-kak-snizit-uroven-trevozhnosti",
+    "id": 35426,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-novorozhdennyh-v-domashnih-usloviyah-polnoe-rukovodstvo-dlya-roditelej/",
+    "slug": "massazh-novorozhdennyh-v-domashnih-usloviyah-polnoe-rukovodstvo-dlya-roditelej",
+    "id": 33247,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-posle-rodov-vosstanovlenie-i-polza/",
+    "slug": "massazh-posle-rodov-vosstanovlenie-i-polza",
+    "id": 33787,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-pri-kolikah-effektivnyj-sposob-oblegchit-diskomfort-u-mladentsev/",
+    "slug": "massazh-pri-kolikah-effektivnyj-sposob-oblegchit-diskomfort-u-mladentsev",
+    "id": 33117,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-zhivotika-pri-kolikah-2/",
+    "slug": "massazh-zhivotika-pri-kolikah-2",
+    "id": 34750,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/mify-o-detskom-massazhe-fakty-i-zabluzhdeniya/",
+    "slug": "mify-o-detskom-massazhe-fakty-i-zabluzhdeniya",
+    "id": 34032,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/stoit-li-obuchatsya-detskomu-massazhu-esli-uzhe-rabotaete-so-vzroslymi/",
+    "slug": "stoit-li-obuchatsya-detskomu-massazhu-esli-uzhe-rabotaete-so-vzroslymi",
+    "id": 35336,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/stoja-li-obuchatsya-detskomu-massazhu-esli-uzhe-rabotaete-so-vzroslymi/",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/zachem-nuzhen-detskij-massazh-polza-tehniki-rezultaty/",
+    "slug": "zachem-nuzhen-detskij-massazh-polza-tehniki-rezultaty",
+    "id": 34424,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/iskusstvo-klassicheskij-massazh-protsess-tehniki-i-rezultat/",
+    "slug": "iskusstvo-klassicheskij-massazh-protsess-tehniki-i-rezultat",
+    "id": 34147,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/klassicheskij-massazh-2/",
+    "slug": "klassicheskij-massazh-2",
+    "id": 26,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/klassicheskij-massazh-bazovyj-kurs-modul-1/",
+    "slug": "klassicheskij-massazh-bazovyj-kurs-modul-1",
+    "id": 31851,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/klassicheskij-massazh-ot-a-do-ya-v-polzu-zdorovya-i-blagopoluchiya/",
+    "slug": "klassicheskij-massazh-ot-a-do-ya-v-polzu-zdorovya-i-blagopoluchiya",
+    "id": 33761,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/klassicheskij-massazh-spiny-tehniki-polza-i-rekomendatsii/",
+    "slug": "klassicheskij-massazh-spiny-tehniki-polza-i-rekomendatsii",
+    "id": 32624,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-massazha-otzyvy/",
+    "slug": "kursy-massazha-otzyvy",
+    "id": 598,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/shvedskij-massazh-iskusstvo-rasslableniya-i-ozdorovleniya/",
+    "slug": "shvedskij-massazh-iskusstvo-rasslableniya-i-ozdorovleniya",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/shvedskij-massazh-osnovnye-printsipy-i-tehniki/",
+    "slug": "shvedskij-massazh-osnovnye-printsipy-i-tehniki",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/vsyo-chto-vam-nuzhno-znat-o-shvedskom-massazhe-tehnika-polza-i-istoriya/",
+    "slug": "vsyo-chto-vam-nuzhno-znat-o-shvedskom-massazhe-tehnika-polza-i-istoriya",
+    "id": 33147,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-miofastsialnogo-massazha-litsa/",
+    "slug": "kursy-miofastsialnogo-massazha-litsa",
+    "id": 9354,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/osobennosti-rasslablyayushhego-massazha-i-chem-on-otlichaetsya-ot-klassicheskogo-massazha/",
+    "slug": "osobennosti-rasslablyayushhego-massazha-i-chem-on-otlichaetsya-ot-klassicheskogo-massazha",
+    "id": 33288,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/rasslablyayushhij-massazh-priemy-i-tehniki/",
+    "slug": "rasslablyayushhij-massazh-priemy-i-tehniki",
+    "id": 33519,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/censitivno-eroticheskij-massazh/",
+    "slug": "censitivno-eroticheskij-massazh",
+    "id": 12768,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-sensitivno-eroticheskogo-massazha/",
+    "slug": "kursy-sensitivno-eroticheskogo-massazha",
+    "id": 3541,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/sensitivno-eroticheskij-massazh-img_0215/",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/frantsuzskij-modeliruyushhij-massazh-beau-visage-et-beau-corps/",
+    "slug": "frantsuzskij-modeliruyushhij-massazh-beau-visage-et-beau-corps",
+    "id": 30284,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-bukkalnogo-massazha/",
+    "slug": "kursy-bukkalnogo-massazha",
+    "id": 7707,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-ispanskogo-hiromassazha-doktora-ferrandisa/",
+    "slug": "kursy-ispanskogo-hiromassazha-doktora-ferrandisa",
+    "id": 7729,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-po-kompleksnomu-skulpturnomu-massazhu-litsa/",
+    "slug": "kursy-po-kompleksnomu-skulpturnomu-massazhu-litsa",
+    "id": 3068,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/marokkanskij-modeliruyushhij-massazh-litsa/",
+    "slug": "marokkanskij-modeliruyushhij-massazh-litsa",
+    "id": 29631,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-litsa-protiv-morshhin/",
+    "slug": "massazh-litsa-protiv-morshhin",
+    "id": 36405,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-ispanskomu-hiromassazhu-litsa-2/",
+    "slug": "obuchenie-ispanskomu-hiromassazhu-litsa-2",
+    "id": 18382,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-kursu-3d-modelirovanie-litsa/",
+    "slug": "obuchenie-kursu-3d-modelirovanie-litsa",
+    "id": 13178,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/plasticheskij-massazh-litsa-professionalnaya-tehnika-dlya-omolozheniya-i-zdorovya-kozhi/",
+    "slug": "plasticheskij-massazh-litsa-professionalnaya-tehnika-dlya-omolozheniya-i-zdorovya-kozhi",
+    "id": 33266,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/provedenie-massazha-litsa-posle-50-metodiki-i-rekomendatsii/",
+    "slug": "provedenie-massazha-litsa-posle-50-metodiki-i-rekomendatsii",
+    "id": 34303,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/skulpturnyj-massazh-litsa-chto-eto-takoe-i-v-chem-ego-preimushhestva/",
+    "slug": "skulpturnyj-massazh-litsa-chto-eto-takoe-i-v-chem-ego-preimushhestva",
+    "id": 33200,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/skulpturnyj-massazh-litsa-tehnika-protsess-i-rezultaty/",
+    "slug": "skulpturnyj-massazh-litsa-tehnika-protsess-i-rezultaty",
+    "id": 34196,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tehnika-yaponskogo-massazha-litsa-kobido-put-k-molodosti-i-zdorovyu/",
+    "slug": "tehnika-yaponskogo-massazha-litsa-kobido-put-k-molodosti-i-zdorovyu",
+    "id": 33094,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/yaponskij-massazh-litsa-kobido/",
+    "slug": "yaponskij-massazh-litsa-kobido",
+    "id": 143,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-i-detoksikatsiya-kak-massazh-pomogaet-v-ochishhenii-organizma/",
+    "slug": "massazh-i-detoksikatsiya-kak-massazh-pomogaet-v-ochishhenii-organizma",
+    "id": 34372,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-i-detoksikatsiya-kak-stimulirovat-vyvod-toksinov-iz-organizma/",
+    "slug": "massazh-i-detoksikatsiya-kak-stimulirovat-vyvod-toksinov-iz-organizma",
+    "id": 35415,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-i-joga-praktiki-dlya-zdorovya-i-garmonii/",
+    "slug": "massazh-i-joga-praktiki-dlya-zdorovya-i-garmonii",
+    "id": 34704,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-i-zdorovoe-pitanie-kak-sovmestit-dlya-maksimalnogo-effekta/",
+    "slug": "massazh-i-zdorovoe-pitanie-kak-sovmestit-dlya-maksimalnogo-effekta",
+    "id": 34577,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/optimizatsiya-figury-effektivnye-metody-umensheniya-obema-beder-i-ustraneniya-problemy-galife/",
+    "slug": "optimizatsiya-figury-effektivnye-metody-umensheniya-obema-beder-i-ustraneniya-problemy-galife",
+    "id": 34086,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/pohudenie-s-pomoshhyu-massazha-kak-vybrat-pravilnuyu-tehniku/",
+    "slug": "pohudenie-s-pomoshhyu-massazha-kak-vybrat-pravilnuyu-tehniku",
+    "id": 34461,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/stadii-tsellyulita-vidy-i-metody-lecheniya/",
+    "slug": "stadii-tsellyulita-vidy-i-metody-lecheniya",
+    "id": 36525,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tehniki-massazha-dlya-snizheniya-vesa-kakoj-vybrat/",
+    "slug": "tehniki-massazha-dlya-snizheniya-vesa-kakoj-vybrat",
+    "id": 34288,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/akupunkturnyj-massazh-metodika-vypolneniya-kitajskogo-massazha/",
+    "slug": "akupunkturnyj-massazh-metodika-vypolneniya-kitajskogo-massazha",
+    "id": 34314,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/apparatnye-tehniki/",
+    "slug": "apparatnye-tehniki",
+    "id": 30872,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/besplatnoe-zanyatie/",
+    "slug": "besplatnoe-zanyatie",
+    "id": 28547,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/besplatnyj-urok/",
+    "slug": "besplatnyj-urok",
+    "id": 19,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/bezlimitnyj-abonement-na-obuchenie/",
+    "slug": "bezlimitnyj-abonement-na-obuchenie",
+    "id": 36509,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/cases/",
+    "slug": "cases",
+    "id": 14435,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/chto-takoe-individualnoe-obuchenie/",
+    "slug": "chto-takoe-individualnoe-obuchenie",
+    "id": 3366,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-vybrat-podhodyashhij-tip-massazha-v-zavisimosti-ot-potrebnostej-klienta/",
+    "slug": "kak-vybrat-podhodyashhij-tip-massazha-v-zavisimosti-ot-potrebnostej-klienta",
+    "id": 33154,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kitajskij-massazh-istselyayushhaya-traditsiya-drevnego-kitaya/",
+    "slug": "kitajskij-massazh-istselyayushhaya-traditsiya-drevnego-kitaya",
+    "id": 33241,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-anatomii-dlya-massazhistov-myshtsy-tela-2/",
+    "slug": "kursy-anatomii-dlya-massazhistov-myshtsy-tela-2",
+    "id": 8990,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-anatomii-dlya-massazhistov-myshtsy-tela/",
+    "slug": "kursy-anatomii-dlya-massazhistov-myshtsy-tela",
+    "id": 7768,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-daosskogo-massazha-tsi-nej-tszan/",
+    "slug": "kursy-daosskogo-massazha-tsi-nej-tszan",
+    "id": 8457,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-i-seminary-v-shkole-masterov-massazha/",
+    "slug": "kursy-i-seminary-v-shkole-masterov-massazha",
+    "id": 2867,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-obucheniya-massazhu-po-zhake/",
+    "slug": "kursy-obucheniya-massazhu-po-zhake",
+    "id": 11050,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-ognennogo-massazha/",
+    "slug": "kursy-ognennogo-massazha",
+    "id": 8993,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-dlya-beremennyh-mify-i-realnost/",
+    "slug": "massazh-dlya-beremennyh-mify-i-realnost",
+    "id": 33614,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-dlya-beremennyh-osobennosti-i-preimushhestva/",
+    "slug": "massazh-dlya-beremennyh-osobennosti-i-preimushhestva",
+    "id": 33586,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-i-beremennost-bezopasnye-tehniki-dlya-budushhih-mam/",
+    "slug": "massazh-i-beremennost-bezopasnye-tehniki-dlya-budushhih-mam",
+    "id": 34619,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-pri-beremennosti-polza-tehniki-i-rekomendatsii-ot-ekspertov/",
+    "slug": "massazh-pri-beremennosti-polza-tehniki-i-rekomendatsii-ot-ekspertov",
+    "id": 33124,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/master-massazha-litsa/",
+    "slug": "master-massazha-litsa",
+    "id": 26626,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchayushhaya-programma-po-telesno-orientirovannym-podhodam/",
+    "slug": "obuchayushhaya-programma-po-telesno-orientirovannym-podhodam",
+    "id": 30129,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchayushhie-kursy-miofastsialnomu-massazhu-tela-2/",
+    "slug": "obuchayushhie-kursy-miofastsialnomu-massazhu-tela-2",
+    "id": 19954,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchayushhie-seminary-v-shkole-masterov-massazha/",
+    "slug": "obuchayushhie-seminary-v-shkole-masterov-massazha",
+    "id": 9496,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-massazhu-bez-meditsinskogo-obrazovaniya-vozmozhnosti-i-perspektivy/",
+    "slug": "obuchenie-massazhu-bez-meditsinskogo-obrazovaniya-vozmozhnosti-i-perspektivy",
+    "id": 34224,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-massazhu-kak-stat-professionalnym-massazhistom/",
+    "slug": "obuchenie-massazhu-kak-stat-professionalnym-massazhistom",
+    "id": 34489,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-massazhu-kak-vybrat-kurs-kotoryj-sootvetstvuet-vashim-tselyam/",
+    "slug": "obuchenie-massazhu-kak-vybrat-kurs-kotoryj-sootvetstvuet-vashim-tselyam",
+    "id": 35392,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-tajskomu-massazhu/",
+    "slug": "obuchenie-tajskomu-massazhu",
+    "id": 17584,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-vostochnym-tehnikam-massazha/",
+    "slug": "obuchenie-vostochnym-tehnikam-massazha",
+    "id": 9501,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/pochemu-beremennym-zhenshhinam-ne-rekomenduetsya-delat-massazh-stop-i-kakie-eshhe-est-protivopokazaniya/",
+    "slug": "pochemu-beremennym-zhenshhinam-ne-rekomenduetsya-delat-massazh-stop-i-kakie-eshhe-est-protivopokazaniya",
+    "id": 34234,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/sportivnyj-massazh-podderzhanie-myshechnogo-tonusa-i-profilaktika-travm/",
+    "slug": "sportivnyj-massazh-podderzhanie-myshechnogo-tonusa-i-profilaktika-travm",
+    "id": 34167,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/sportivnyj-massazh-preimushhestva-tehniki-i-vliyanie-na-proizvoditelnost/",
+    "slug": "sportivnyj-massazh-preimushhestva-tehniki-i-vliyanie-na-proizvoditelnost",
+    "id": 32867,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/chto-takoe-vip-gruppa/",
+    "slug": "chto-takoe-vip-gruppa",
+    "id": 3363,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/gruppovaya-forma-obucheniya/",
+    "slug": "gruppovaya-forma-obucheniya",
+    "id": 3360,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-izbezhat-vygoraniya-massazhistu-sovety-i-rekomendatsii/",
+    "slug": "kak-izbezhat-vygoraniya-massazhistu-sovety-i-rekomendatsii",
+    "id": 34308,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-soblyudenie-eticheskih-printsipov-povyshaet-professionalizm-massazhista/",
+    "slug": "kak-soblyudenie-eticheskih-printsipov-povyshaet-professionalizm-massazhista",
+    "id": 33708,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kakie-talanty-nuzhny-dlya-uspeshnoj-karery-massazhista/",
+    "slug": "kakie-talanty-nuzhny-dlya-uspeshnoj-karery-massazhista",
+    "id": 35299,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kakim-dolzhen-byt-master-massazha-klyuchevye-kachestva-i-navyki/",
+    "slug": "kakim-dolzhen-byt-master-massazha-klyuchevye-kachestva-i-navyki",
+    "id": 33221,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kakoj-tonus-myshts-nazyvayut-normalnym-putevoditel-dlya-budushhih-massazhistov/",
+    "slug": "kakoj-tonus-myshts-nazyvayut-normalnym-putevoditel-dlya-budushhih-massazhistov",
+    "id": 32818,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/nutritsiologiya-dlya-spetsialistov-po-massazhu/",
+    "slug": "nutritsiologiya-dlya-spetsialistov-po-massazhu",
+    "id": 29118,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obzor-massazhnyh-sredstv-i-oborudovaniya-chto-vybrat-dlya-doma-i-raboty/",
+    "slug": "obzor-massazhnyh-sredstv-i-oborudovaniya-chto-vybrat-dlya-doma-i-raboty",
+    "id": 35112,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/osnovy-anatomii-dlya-massazhistov-chto-nuzhno-znat/",
+    "slug": "osnovy-anatomii-dlya-massazhistov-chto-nuzhno-znat",
+    "id": 34558,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tipy-lichnosti-prikladnye-modeli-dlya-professionalnoj-i-povsednevnoj-zhizni/",
+    "slug": "tipy-lichnosti-prikladnye-modeli-dlya-professionalnoj-i-povsednevnoj-zhizni",
+    "id": 29906,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tipy-massazhnyh-stolov-i-kak-vybrat-podhodyashhij/",
+    "slug": "tipy-massazhnyh-stolov-i-kak-vybrat-podhodyashhij",
+    "id": 35743,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/vostrebovannost-massazhistov/",
+    "slug": "vostrebovannost-massazhistov",
+    "id": 782,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/ya-boyus-delat-lyudyam-massazh-delayu-tolko-svoim-kak-preodolet-strah-i-razvit-uverennost/",
+    "slug": "ya-boyus-delat-lyudyam-massazh-delayu-tolko-svoim-kak-preodolet-strah-i-razvit-uverennost",
+    "id": 34103,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/zabota-o-sobstvennom-zdorove-massazhista-profilaktika-professionalnyh-zabolevanij/",
+    "slug": "zabota-o-sobstvennom-zdorove-massazhista-profilaktika-professionalnyh-zabolevanij",
+    "id": 34525,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/vodoroslevoe-obertyvanie-sekrety-omolozheniya-i-ozdorovleniya/",
+    "slug": "vodoroslevoe-obertyvanie-sekrety-omolozheniya-i-ozdorovleniya",
+    "id": 33363,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/yaponskaya-tehnika-liftinga-otkrojte-put-k-estestvennoj-molodosti-i-krasote/",
+    "slug": "yaponskaya-tehnika-liftinga-otkrojte-put-k-estestvennoj-molodosti-i-krasote",
+    "id": 32837,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-dlya-lyudej-s-osobymi-potrebnostyami-vidy-i-rezultaty/",
+    "slug": "massazh-dlya-lyudej-s-osobymi-potrebnostyami-vidy-i-rezultaty",
+    "id": 34655,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-pri-ozhirenii-effektivnye-metodiki-i-preimushhestva/",
+    "slug": "massazh-pri-ozhirenii-effektivnye-metodiki-i-preimushhestva",
+    "id": 33562,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-pri-posledstviyah-travmy-organov-dvizheniya-put-k-vosstanovleniyu/",
+    "slug": "massazh-pri-posledstviyah-travmy-organov-dvizheniya-put-k-vosstanovleniyu",
+    "id": 33541,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/metodika-provedeniya-massazha/",
+    "slug": "metodika-provedeniya-massazha",
+    "id": 30973,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/mify-i-fakty-o-vakuumnom-massazhe-razbiraem-populyarnye-zabluzhdeniya/",
+    "slug": "mify-i-fakty-o-vakuumnom-massazhe-razbiraem-populyarnye-zabluzhdeniya",
+    "id": 34024,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/myagkie-manualnye-tehniki-kotorye-podhodyat-vsem/",
+    "slug": "myagkie-manualnye-tehniki-kotorye-podhodyat-vsem",
+    "id": 29031,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/osobennosti-raboty-massazhista-s-klientami-s-ozhireniem/",
+    "slug": "osobennosti-raboty-massazhista-s-klientami-s-ozhireniem",
+    "id": 35524,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/postizometricheskaya-relaksatsiya-myshts/",
+    "slug": "postizometricheskaya-relaksatsiya-myshts",
+    "id": 6798,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/sekrety-professionalnyh-massazhistov-lajfhaki-i-sovety/",
+    "slug": "sekrety-professionalnyh-massazhistov-lajfhaki-i-sovety",
+    "id": 35220,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tehniki-massazha-dlya-lyudej-s-ogranichennymi-vozmozhnostyami/",
+    "slug": "tehniki-massazha-dlya-lyudej-s-ogranichennymi-vozmozhnostyami",
+    "id": 35428,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/chto-delat-esli-posle-massazha-usililis-bolevye-oshhushheniya/",
+    "slug": "chto-delat-esli-posle-massazha-usililis-bolevye-oshhushheniya",
+    "id": 35520,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/chto-proishodit-v-zabitoj-myshtse/",
+    "slug": "chto-proishodit-v-zabitoj-myshtse",
+    "id": 33500,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/daosskij-massazh-sekrety-drevnego-iskusstva-dlya-sovremennoj-zhizni/",
+    "slug": "daosskij-massazh-sekrety-drevnego-iskusstva-dlya-sovremennoj-zhizni",
+    "id": 33261,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/dopustim-li-massazh-pri-zabolevaniyah-shhitovidnoj-zhelezy-mify-i-realnost/",
+    "slug": "dopustim-li-massazh-pri-zabolevaniyah-shhitovidnoj-zhelezy-mify-i-realnost",
+    "id": 33213,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/dopustim-li-massazh-pri-zabolevaniyah-shhitovidnoj-zhelezy/",
+    "slug": "dopustim-li-massazh-pri-zabolevaniyah-shhitovidnoj-zhelezy",
+    "id": 34539,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/effektivnye-metody-massazha-pri-boleznyah-oporno-dvigatelnogo-apparata/",
+    "slug": "effektivnye-metody-massazha-pri-boleznyah-oporno-dvigatelnogo-apparata",
+    "id": 32498,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/energeticheskij-massazh-balansirovka-chakr-i-rabota-s-energeticheskimi-polyami/",
+    "slug": "energeticheskij-massazh-balansirovka-chakr-i-rabota-s-energeticheskimi-polyami",
+    "id": 35090,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/energeticheskij-massazh-issleduem-vliyanie-na-telo-i-razum/",
+    "slug": "energeticheskij-massazh-issleduem-vliyanie-na-telo-i-razum",
+    "id": 33664,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/glubokoe-ponimanie-miofastsialnogo-massazha-tehnika-preimushhestva-i-primenenie/",
+    "slug": "glubokoe-ponimanie-miofastsialnogo-massazha-tehnika-preimushhestva-i-primenenie",
+    "id": 33423,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/holisticheskij-massazh/",
+    "slug": "holisticheskij-massazh",
+    "id": 29003,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/holisticheskij-podhod-k-pulsatsii-osnovy-i-praktika-dlya-budushhih-massazhistov/",
+    "slug": "holisticheskij-podhod-k-pulsatsii-osnovy-i-praktika-dlya-budushhih-massazhistov",
+    "id": 33730,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/indijskij-massazh-istselyayushhee-iskusstvo-drevnej-traditsii/",
+    "slug": "indijskij-massazh-istselyayushhee-iskusstvo-drevnej-traditsii",
+    "id": 33341,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/iskusstvo-massazha-dlya-par-kak-klyuch-k-garmonichnym-otnosheniyam/",
+    "slug": "iskusstvo-massazha-dlya-par-kak-klyuch-k-garmonichnym-otnosheniyam",
+    "id": 33794,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/iskusstvo-massazha-nog-tehniki-preimushhestva-i-prakticheskie-sovety/",
+    "slug": "iskusstvo-massazha-nog-tehniki-preimushhestva-i-prakticheskie-sovety",
+    "id": 33416,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/iskusstvo-shiatsu-yaponskij-massazh-dlya-garmonii-i-zdorovya/",
+    "slug": "iskusstvo-shiatsu-yaponskij-massazh-dlya-garmonii-i-zdorovya",
+    "id": 33976,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/iskusstvo-vostochnogo-massazha-traditsii-tehniki-i-vygody/",
+    "slug": "iskusstvo-vostochnogo-massazha-traditsii-tehniki-i-vygody",
+    "id": 33946,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/ispanskij-massazh-iskusstvo-i-nauka-dlya-sovremennyh-spetsialistov/",
+    "slug": "ispanskij-massazh-iskusstvo-i-nauka-dlya-sovremennyh-spetsialistov",
+    "id": 33111,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/istoriya-i-evolyutsiya-massazha-kak-eto-iskusstvo-razvivalos-so-vremenem/",
+    "slug": "istoriya-i-evolyutsiya-massazha-kak-eto-iskusstvo-razvivalos-so-vremenem",
+    "id": 33675,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-izbezhat-boli-i-sinyakov-posle-massazha/",
+    "slug": "kak-izbezhat-boli-i-sinyakov-posle-massazha",
+    "id": 35753,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-massazh-mozhet-pomoch-pri-hronicheskih-bolyah-i-zabolevaniyah/",
+    "slug": "kak-massazh-mozhet-pomoch-pri-hronicheskih-bolyah-i-zabolevaniyah",
+    "id": 34569,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-massazh-pomogaet-pri-bessonnitse-polnoe-rukovodstvo/",
+    "slug": "kak-massazh-pomogaet-pri-bessonnitse-polnoe-rukovodstvo",
+    "id": 33185,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-massazh-pomogaet-prodlit-molodost/",
+    "slug": "kak-massazh-pomogaet-prodlit-molodost",
+    "id": 32789,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-massazh-vliyaet-na-mikroklimat-v-seme/",
+    "slug": "kak-massazh-vliyaet-na-mikroklimat-v-seme",
+    "id": 33579,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-massazh-vliyaet-na-sintez-endorfinov-nauchnyj-podhod-i-prakticheskaya-polza/",
+    "slug": "kak-massazh-vliyaet-na-sintez-endorfinov-nauchnyj-podhod-i-prakticheskaya-polza",
+    "id": 33295,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-podgotovit-telo-k-massazhu-vazhnye-shagi-pered-protseduroj/",
+    "slug": "kak-podgotovit-telo-k-massazhu-vazhnye-shagi-pered-protseduroj",
+    "id": 35387,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kosmeticheskij-massazh-iskusstvo-i-nauka-omolozheniya/",
+    "slug": "kosmeticheskij-massazh-iskusstvo-i-nauka-omolozheniya",
+    "id": 32760,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-dlya-uluchsheniya-krovoobrashheniya-osnovnye-tehniki-i-ih-polza/",
+    "slug": "massazh-dlya-uluchsheniya-krovoobrashheniya-osnovnye-tehniki-i-ih-polza",
+    "id": 33732,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-i-allergii-kak-massazh-mozhet-pomoch/",
+    "slug": "massazh-i-allergii-kak-massazh-mozhet-pomoch",
+    "id": 34588,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-i-gormonalnyj-balans-mify-i-fakty/",
+    "slug": "massazh-i-gormonalnyj-balans-mify-i-fakty",
+    "id": 34608,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-i-psihosomatika-kak-fizicheskoe-vozdejstvie-pomogaet-spravitsya-s-emotsionalnymi-problemami/",
+    "slug": "massazh-i-psihosomatika-kak-fizicheskoe-vozdejstvie-pomogaet-spravitsya-s-emotsionalnymi-problemami",
+    "id": 34667,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-i-vozrastnye-izmeneniya-kak-podderzhat-zdorove-posle-50-let/",
+    "slug": "massazh-i-vozrastnye-izmeneniya-kak-podderzhat-zdorove-posle-50-let",
+    "id": 35526,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-kak-metod-stress-menedzhmenta-kak-spravitsya-s-povsednevnym-napryazheniem/",
+    "slug": "massazh-kak-metod-stress-menedzhmenta-kak-spravitsya-s-povsednevnym-napryazheniem",
+    "id": 34172,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-nog-polza-tehniki-i-rekomendatsii/",
+    "slug": "massazh-nog-polza-tehniki-i-rekomendatsii",
+    "id": 33958,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-nog-tehniki-preimushhestva-i-prakticheskie-sovety/",
+    "slug": "massazh-nog-tehniki-preimushhestva-i-prakticheskie-sovety",
+    "id": 34063,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-pri-depressii-podderzhka-i-oblegchenie-simptomov/",
+    "slug": "massazh-pri-depressii-podderzhka-i-oblegchenie-simptomov",
+    "id": 35105,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-pri-saharnom-diabete-polza-osobennosti-i-rekomendatsii/",
+    "slug": "massazh-pri-saharnom-diabete-polza-osobennosti-i-rekomendatsii",
+    "id": 33282,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-pri-zabolevaniyah-pishhevaritelnoj-sistemy-tehniki-i-polza/",
+    "slug": "massazh-pri-zabolevaniyah-pishhevaritelnoj-sistemy-tehniki-i-polza",
+    "id": 33555,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-protiv-stressa-kak-izbavitsya-ot-napryazheniya/",
+    "slug": "massazh-protiv-stressa-kak-izbavitsya-ot-napryazheniya",
+    "id": 33600,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-ruk-tehniki-preimushhestva-i-prakticheskie-sovety/",
+    "slug": "massazh-ruk-tehniki-preimushhestva-i-prakticheskie-sovety",
+    "id": 34056,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-tochek-dlya-glaz-uluchshenie-zreniya-i-snyatie-napryazheniya/",
+    "slug": "massazh-tochek-dlya-glaz-uluchshenie-zreniya-i-snyatie-napryazheniya",
+    "id": 33207,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-zhivota-drevnyaya-praktika-dlya-sovremennogo-zdorovya/",
+    "slug": "massazh-zhivota-drevnyaya-praktika-dlya-sovremennogo-zdorovya",
+    "id": 32752,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-zhivota-pri-zapore-effektivnye-metodiki-dlya-uluchsheniya-peristaltiki-kishechnika/",
+    "slug": "massazh-zhivota-pri-zapore-effektivnye-metodiki-dlya-uluchsheniya-peristaltiki-kishechnika",
+    "id": 33435,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-zhivota-put-k-zdorovyu-i-garmonii/",
+    "slug": "massazh-zhivota-put-k-zdorovyu-i-garmonii",
+    "id": 33348,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-zhivota-vliyanie-i-primenenie-v-zdorove-i-uhode/",
+    "slug": "massazh-zhivota-vliyanie-i-primenenie-v-zdorove-i-uhode",
+    "id": 34213,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/ofisnyj-massazh-uluchshenie-samochuvstviya-i-produktivnosti-sotrudnikov/",
+    "slug": "ofisnyj-massazh-uluchshenie-samochuvstviya-i-produktivnosti-sotrudnikov",
+    "id": 33195,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/osobennosti-massazha-pri-beremennosti/",
+    "slug": "osobennosti-massazha-pri-beremennosti",
+    "id": 31767,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/pochemu-massazh-dolzhen-byt-regulyarnoj-protseduroj/",
+    "slug": "pochemu-massazh-dolzhen-byt-regulyarnoj-protseduroj",
+    "id": 35746,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/populyarnye-mify-o-massazhe-chto-pravda-a-chto-vymysel/",
+    "slug": "populyarnye-mify-o-massazhe-chto-pravda-a-chto-vymysel",
+    "id": 35098,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/probuzhdenie-vnutrennej-sily/",
+    "slug": "probuzhdenie-vnutrennej-sily",
+    "id": 30579,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/put-k-komfortu-massazh-dlya-pozhilyh-lyudej/",
+    "slug": "put-k-komfortu-massazh-dlya-pozhilyh-lyudej",
+    "id": 33547,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/rabota-s-fastsiej-vazhnost-i-metodika-rastyazheniya/",
+    "slug": "rabota-s-fastsiej-vazhnost-i-metodika-rastyazheniya",
+    "id": 35896,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/rasslablyayushhij-massazh-nog-klyuch-k-zdorovyu-i-komfortu/",
+    "slug": "rasslablyayushhij-massazh-nog-klyuch-k-zdorovyu-i-komfortu",
+    "id": 32660,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/rasslablyayushhij-massazh-nog-stupni-i-goleni/",
+    "slug": "rasslablyayushhij-massazh-nog-stupni-i-goleni",
+    "id": 34114,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/rasslablyayushhij-massazh-polza-i-sovremennye-podhody/",
+    "slug": "rasslablyayushhij-massazh-polza-i-sovremennye-podhody",
+    "id": 34350,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/raznye-vidy-massazha-dlya-raznyh-tipov-teloslozheniya-individualnyj-podhod/",
+    "slug": "raznye-vidy-massazha-dlya-raznyh-tipov-teloslozheniya-individualnyj-podhod",
+    "id": 35418,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/rol-massazha-v-vosstanovlenii-posle-trenirovok/",
+    "slug": "rol-massazha-v-vosstanovlenii-posle-trenirovok",
+    "id": 34617,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/shiatsu-traditsionnaya-yaponskaya-tehnika-massazha/",
+    "slug": "shiatsu-traditsionnaya-yaponskaya-tehnika-massazha",
+    "id": 34270,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/sinyaki-posle-massazha-prichiny-i-metody-ih-predotvrashheniya/",
+    "slug": "sinyaki-posle-massazha-prichiny-i-metody-ih-predotvrashheniya",
+    "id": 34075,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tajskij-massazh-drevnee-iskusstvo-dlya-sovremennogo-mira/",
+    "slug": "tajskij-massazh-drevnee-iskusstvo-dlya-sovremennogo-mira",
+    "id": 33172,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tajskij-massazh-opisanie-i-tehnika-vypolneniya/",
+    "slug": "tajskij-massazh-opisanie-i-tehnika-vypolneniya",
+    "id": 33509,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tajskij-massazh-osnovy-printsipy-tehniki/",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/tajskij-massazh-putevoditel-v-mir-drevnego-iskusstva/",
+    "slug": "tajskij-massazh-putevoditel-v-mir-drevnego-iskusstva",
+    "id": 32612,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/terapiya-ognem-printsipy-rezultaty-i-tehniki/",
+    "slug": "terapiya-ognem-printsipy-rezultaty-i-tehniki",
+    "id": 34093,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tochechnyj-massazh-effektivnye-tehniki-i-primenenie-v-praktike-massazha/",
+    "slug": "tochechnyj-massazh-effektivnye-tehniki-i-primenenie-v-praktike-massazha",
+    "id": 33690,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tochechnyj-massazh-iskusstvo-istseleniya-i-omolozheniya/",
+    "slug": "tochechnyj-massazh-iskusstvo-istseleniya-i-omolozheniya",
+    "id": 33316,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/trendy-v-mire-massazha-novye-tehniki-i-podhody/",
+    "slug": "trendy-v-mire-massazha-novye-tehniki-i-podhody",
+    "id": 34514,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/triggernye-tochki-kak-pravilno-ih-massirovat-dlya-oblegcheniya-boli/",
+    "slug": "triggernye-tochki-kak-pravilno-ih-massirovat-dlya-oblegcheniya-boli",
+    "id": 35257,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/triggernye-tochki-myshts-chto-eto-takoe-i-kak-s-nimi-rabotat/",
+    "slug": "triggernye-tochki-myshts-chto-eto-takoe-i-kak-s-nimi-rabotat",
+    "id": 33133,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/vibratsionnye-tehniki-v-massazhe-kogda-i-kak-ih-ispolzovat/",
+    "slug": "vibratsionnye-tehniki-v-massazhe-kogda-i-kak-ih-ispolzovat",
+    "id": 33158,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/vliyanie-gormonov-na-organizm-i-rol-massazha-v-ih-regulyatsii/",
+    "slug": "vliyanie-gormonov-na-organizm-i-rol-massazha-v-ih-regulyatsii",
+    "id": 33987,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/vliyanie-massazha-na-endokrinnuyu-regulyatsiyu-gormony/",
+    "slug": "vliyanie-massazha-na-endokrinnuyu-regulyatsiyu-gormony",
+    "id": 34362,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/vse-o-massazhe-dlya-nachinayushhih-rukovodstvo-ot-shkoly-massazha/",
+    "slug": "vse-o-massazhe-dlya-nachinayushhih-rukovodstvo-ot-shkoly-massazha",
+    "id": 32692,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/zabitye-myshtsy-prichiny-posledstviya-i-resheniya/",
+    "slug": "zabitye-myshtsy-prichiny-posledstviya-i-resheniya",
+    "id": 32642,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/zamenyat-li-elektronnye-massazhery-ruchnoj-massazh-2/",
+    "slug": "zamenyat-li-elektronnye-massazhery-ruchnoj-massazh-2",
+    "id": 33256,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kakie-problemy-reshaet-kompleksnyj-massazh-litsa/",
+    "slug": "kakie-problemy-reshaet-kompleksnyj-massazh-litsa",
+    "id": 33576,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-massazha-litsa/",
+    "slug": "kursy-massazha-litsa",
+    "id": 1024,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/master-klass-po-massazhu-litsa/",
+    "slug": "master-klass-po-massazhu-litsa",
+    "id": 16159,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/pochemu-vazhen-kompleksnyj-podhod-k-massazhu-litsa-i-shei/",
+    "slug": "pochemu-vazhen-kompleksnyj-podhod-k-massazhu-litsa-i-shei",
+    "id": 34107,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/preimushhestva-raboty-massazhistom-litsa/",
+    "slug": "preimushhestva-raboty-massazhistom-litsa",
+    "id": 34231,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/chto-takoe-halyus-valgus-i-kak-s-nim-borotsya-s-pomoshhyu-massazha/",
+    "slug": "chto-takoe-halyus-valgus-i-kak-s-nim-borotsya-s-pomoshhyu-massazha",
+    "id": 33163,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kakie-tehniki-massazha-stop-samye-effektivnye-dlya-snyatiya-napryazheniya-i-ustalosti/",
+    "slug": "kakie-tehniki-massazha-stop-samye-effektivnye-dlya-snyatiya-napryazheniya-i-ustalosti",
+    "id": 33406,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-stop-s-primeneniem-tejpirovaniya-effektivnost-i-rezultaty/",
+    "slug": "massazh-stop-s-primeneniem-tejpirovaniya-effektivnost-i-rezultaty",
+    "id": 35894,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tehniki-massazha-s-goryachimi-kamnyami-i-travyanymi-meshochkami-dlya-stop/",
+    "slug": "tehniki-massazha-s-goryachimi-kamnyami-i-travyanymi-meshochkami-dlya-stop",
+    "id": 33486,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tejpirovanie-pri-diastaze-i-posle-kesareva-mif-ili-pravda/",
+    "slug": "tejpirovanie-pri-diastaze-i-posle-kesareva-mif-ili-pravda",
+    "id": 35279,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tejpirovanie-tela-effektivnoe-sredstvo-dlya-vosstanovleniya-i-podderzhki-zdorovya/",
+    "slug": "tejpirovanie-tela-effektivnoe-sredstvo-dlya-vosstanovleniya-i-podderzhki-zdorovya",
+    "id": 33368,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tejpirovanie-tela-effektivnye-tehniki-i-preimushhestva/",
+    "slug": "tejpirovanie-tela-effektivnye-tehniki-i-preimushhestva",
+    "id": 34403,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tejpirovanie-zhivota-dlya-pohudeniya-pravila-i-shemy-2/",
+    "slug": "tejpirovanie-zhivota-dlya-pohudeniya-pravila-i-shemy-2",
+    "id": 32603,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tejpirovanie-zhivota-dlya-pohudeniya-pravila-i-shemy/",
+    "slug": "tejpirovanie-zhivota-dlya-pohudeniya-pravila-i-shemy",
+    "id": 31365,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-kineziotejpirovanie-nachalnyj-uroven/",
+    "slug": "kursy-kineziotejpirovanie-nachalnyj-uroven",
+    "id": 9333,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-manualno-myshechnogo-testirovaniya/",
+    "slug": "kursy-manualno-myshechnogo-testirovaniya",
+    "id": 12512,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kursy-sportivnogo-massazha/",
+    "slug": "kursy-sportivnogo-massazha",
+    "id": 171,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-dlya-sportsmenov-osobennosti-i-preimushhestva/",
+    "slug": "massazh-dlya-sportsmenov-osobennosti-i-preimushhestva",
+    "id": 33702,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-dlya-sportsmenov-put-k-vosstanovleniyu-i-uluchsheniyu-rezultatov/",
+    "slug": "massazh-dlya-sportsmenov-put-k-vosstanovleniyu-i-uluchsheniyu-rezultatov",
+    "id": 33429,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchayushhij-kurs-triggernye-tochki-myshc/",
+    "slug": "obuchayushhij-kurs-triggernye-tochki-myshc",
+    "id": 12045,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-esteticheskomu-tejpirovaniyu-litsa/",
+    "slug": "obuchenie-esteticheskomu-tejpirovaniyu-litsa",
+    "id": 12538,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/osnovy-sportivnogo-massazha-klyuchevye-printsipy-i-preimushhestva/",
+    "slug": "osnovy-sportivnogo-massazha-klyuchevye-printsipy-i-preimushhestva",
+    "id": 34342,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/sportivnyj-massazh-osnovnye-printsipy-tehnika-polza/",
+    "slug": "sportivnyj-massazh-osnovnye-printsipy-tehnika-polza",
+    "id": 33756,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tejpirovanie-img_9747/",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/tejpirovanie-litsa-pravila-i-shemy/",
+    "slug": "tejpirovanie-litsa-pravila-i-shemy",
+    "id": 33532,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tejpirovanie-litsa-tehniki-printsipy-i-primenenie/",
+    "slug": "tejpirovanie-litsa-tehniki-printsipy-i-primenenie",
+    "id": 34039,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/triggernye-tochki-img_9202/",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/banochnyj-massazh-litsa-put-k-molodosti-i-zdorovyu-kozhi/",
+    "slug": "banochnyj-massazh-litsa-put-k-molodosti-i-zdorovyu-kozhi",
+    "id": 32813,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/birmanskij-massazh-litsa-iskusstvo-omolozheniya-i-garmonii/",
+    "slug": "birmanskij-massazh-litsa-iskusstvo-omolozheniya-i-garmonii",
+    "id": 33715,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/hiroplasticheskij-massazh-litsa-preimushhestva-i-tehniki/",
+    "slug": "hiroplasticheskij-massazh-litsa-preimushhestva-i-tehniki",
+    "id": 34201,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-guasha-dlya-litsa-krasivaya-priyatnaya-effektivnaya-protsedura/",
+    "slug": "massazh-guasha-dlya-litsa-krasivaya-priyatnaya-effektivnaya-protsedura",
+    "id": 34287,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-litsa-i-ego-preimushhestva-tehniki-i-ih-effekt/",
+    "slug": "massazh-litsa-i-ego-preimushhestva-tehniki-i-ih-effekt",
+    "id": 34666,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-litsa-iskusstvo-molodosti-i-krasoty/",
+    "slug": "massazh-litsa-iskusstvo-molodosti-i-krasoty",
+    "id": 32682,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/modeliruyushhij-massazh-litsa-sekrety-uhoda-za-kozhej-i-metody-primeneniya/",
+    "slug": "modeliruyushhij-massazh-litsa-sekrety-uhoda-za-kozhej-i-metody-primeneniya",
+    "id": 33459,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/samomassazh-litsa-1-stupen/",
+    "slug": "samomassazh-litsa-1-stupen",
+    "id": 29169,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-banochnyj-massazh-litsa/",
+    "slug": "seminar-banochnyj-massazh-litsa",
+    "id": 7124,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/vakuumnyj-banochnyj-massazh-litsa/",
+    "slug": "vakuumnyj-banochnyj-massazh-litsa",
+    "id": 36535,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/diagnostika-pozvonochnika/",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/kurs-manualno-osteopaticheskih-tehnik/",
+    "slug": "kurs-manualno-osteopaticheskih-tehnik",
+    "id": 30681,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-spiny-i-shei-ustranenie-napryazheniya-i-boli/",
+    "slug": "massazh-spiny-i-shei-ustranenie-napryazheniya-i-boli",
+    "id": 34156,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/preobrazite-svoyu-praktiku-massazha-obuchayushhij-kurs-vizualnaya-i-funktsionalnaya-diagnostika-patsienta-dlya-massazhistov/",
+    "slug": "preobrazite-svoyu-praktiku-massazha-obuchayushhij-kurs-vizualnaya-i-funktsionalnaya-diagnostika-patsienta-dlya-massazhistov",
+    "id": 28786,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/vliyanie-massazha-spiny-na-osanku/",
+    "slug": "vliyanie-massazha-spiny-na-osanku",
+    "id": 34378,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/rasslablyayushhij-i-relaks-massazh-osnovnye-otlichiya-vybor-i-demonstratsiya-raznyh-tehnik-s-ispolzovaniem-masel-cosmosuits/",
+    "slug": "rasslablyayushhij-i-relaks-massazh-osnovnye-otlichiya-vybor-i-demonstratsiya-raznyh-tehnik-s-ispolzovaniem-masel-cosmosuits",
+    "id": 30479,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kak-masteru-massazha-uvelichit-svoj-dohod/",
+    "slug": "kak-masteru-massazha-uvelichit-svoj-dohod",
+    "id": 34373,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/skolko-zarabatyvayut-massazhisty-v-mesyats-na-domu-2/",
+    "slug": "skolko-zarabatyvayut-massazhisty-v-mesyats-na-domu-2",
+    "id": 36401,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kakie-tehniki-massazha-podhodyat-dlya-uluchsheniya-limfodrenazha/",
+    "slug": "kakie-tehniki-massazha-podhodyat-dlya-uluchsheniya-limfodrenazha",
+    "id": 35750,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-dlya-korrektsii-figury-metodiki-i-preimushhestva/",
+    "slug": "massazh-dlya-korrektsii-figury-metodiki-i-preimushhestva",
+    "id": 34049,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-kolennogo-sustava-effektivnye-priemy-dlya-zdorovya-i-vosstanovleniya/",
+    "slug": "massazh-kolennogo-sustava-effektivnye-priemy-dlya-zdorovya-i-vosstanovleniya",
+    "id": 33453,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-pri-ploskostopii-put-k-zdorovym-stopam/",
+    "slug": "massazh-pri-ploskostopii-put-k-zdorovym-stopam",
+    "id": 33233,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-pri-varikoznom-rasshirenii-ven-vazhnye-aspekty-i-rekomendatsii/",
+    "slug": "massazh-pri-varikoznom-rasshirenii-ven-vazhnye-aspekty-i-rekomendatsii",
+    "id": 33190,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/mify-o-massazhe-po-korrektsii-figury/",
+    "slug": "mify-o-massazhe-po-korrektsii-figury",
+    "id": 33737,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/nevidimaya-nit-svyaz-massazha-s-povysheniem-immuniteta/",
+    "slug": "nevidimaya-nit-svyaz-massazha-s-povysheniem-immuniteta",
+    "id": 34385,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/vakuumnyj-massazh-polza-protsedury/",
+    "slug": "vakuumnyj-massazh-polza-protsedury",
+    "id": 34124,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/vakuumnyj-massazh-sekrety-effektivnosti-i-polzy-dlya-vashego-zdorovya/",
+    "slug": "vakuumnyj-massazh-sekrety-effektivnosti-i-polzy-dlya-vashego-zdorovya",
+    "id": 32668,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/vakuumnyj-massazh-tehnika-preimushhestva-polza/",
+    "slug": "vakuumnyj-massazh-tehnika-preimushhestva-polza",
+    "id": 33980,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/pochemu-masteru-vygodno-delat-massazh-po-korrektsii-figury/",
+    "slug": "pochemu-masteru-vygodno-delat-massazh-po-korrektsii-figury",
+    "id": 33398,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/guseva-inna-aleksandrovna/",
+    "slug": "guseva-inna-aleksandrovna",
+    "id": 26626,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/img_2620/",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/img_6101/",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/kalistratova_certificates_/",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/kapustina-viktoriya-viktorovna/",
+    "slug": "kapustina-viktoriya-viktorovna",
+    "id": 33027,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/klassicheskij-massazh-pro-level-2/",
+    "slug": "klassicheskij-massazh-pro-level-2",
+    "id": 21005,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/klassicheskij-massazh-pro-level-3/",
+    "slug": "klassicheskij-massazh-pro-level-3",
+    "id": 21051,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/klassicheskij-massazh-pro-level/",
+    "slug": "klassicheskij-massazh-pro-level",
+    "id": 20891,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/kobido/",
+    "slug": "kobido",
+    "id": 143,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/komarov-roman-valerevich/",
+    "slug": "komarov-roman-valerevich",
+    "id": "",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/korugi/",
+    "slug": "korugi",
+    "id": 12011,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/lechebnaya-fizkultura-bazovyj-blok/",
+    "slug": "lechebnaya-fizkultura-bazovyj-blok",
+    "id": 29128,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/lfk-pri-dtsp-s-osnovami-vojta-terapii/",
+    "slug": "lfk-pri-dtsp-s-osnovami-vojta-terapii",
+    "id": 30630,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/manualnaya-terapiya-i-blok-bazovyj-uroven/",
+    "slug": "manualnaya-terapiya-i-blok-bazovyj-uroven",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/masharina-aleksandra-fedorovna/",
+    "slug": "masharina-aleksandra-fedorovna",
+    "id": 17584,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massagemaster/",
+    "slug": "massagemaster",
+    "id": 22935,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-golovy-kak-uluchshit-zdorove-i-blagopoluchie-cherez-terapiyu-kozhi-i-volos/",
+    "slug": "massazh-golovy-kak-uluchshit-zdorove-i-blagopoluchie-cherez-terapiyu-kozhi-i-volos",
+    "id": 33999,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-grudi-dush/",
+    "slug": "massazh-grudi-dush",
+    "id": "",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-grudi/",
+    "slug": "massazh-grudi",
+    "id": "",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-guasha-obuchenie/",
+    "slug": "massazh-guasha-obuchenie",
+    "id": 4544,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/massazh-volosatoj-chasti-golovy-polnoe-rukovodstvo-dlya-nachinayushhih/",
+    "slug": "massazh-volosatoj-chasti-golovy-polnoe-rukovodstvo-dlya-nachinayushhih",
+    "id": 33334,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/master-korrektsii-figury-2/",
+    "slug": "master-korrektsii-figury-2",
+    "id": 3465,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/master-korrektsii-figury/",
+    "slug": "master-korrektsii-figury",
+    "id": 18154,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/master-massazha/",
+    "slug": "master-massazha",
+    "id": 18056,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/masterklass/",
+    "slug": "masterklass",
+    "id": 16076,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/meditsinskaya-sestra/",
+    "slug": "meditsinskaya-sestra",
+    "id": 18325,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/mikov-matvej-anatolevich/",
+    "slug": "mikov-matvej-anatolevich",
+    "id": 33027,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/o-shkole-masterov-massazha/",
+    "slug": "o-shkole-masterov-massazha",
+    "id": 1094,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/o-shkole/",
+    "slug": "o-shkole",
+    "id": 5,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obespechenie-rashodnymi-materialami/",
+    "slug": "obespechenie-rashodnymi-materialami",
+    "id": 11944,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/obuchenie-tehnikam-massazha-litsa/",
+    "slug": "obuchenie-tehnikam-massazha-litsa",
+    "id": 9509,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/oplata/",
+    "slug": "oplata",
+    "id": 6399,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/orogold-self-facial-massage-900x895/",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/otzyvy-rabotodatelej/",
+    "slug": "otzyvy-rabotodatelej",
+    "id": 4576,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/podarochnye-sertifikaty/",
+    "slug": "podarochnye-sertifikaty",
+    "id": 963,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/podbor-personala/",
+    "slug": "podbor-personala",
+    "id": 11937,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/podskazki-klassicheskij-massazh-free/",
+    "slug": "podskazki-klassicheskij-massazh-free",
+    "id": 30903,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/podskazki-klassicheskij-massazh/",
+    "slug": "podskazki-klassicheskij-massazh",
+    "id": 29863,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/politika-konfidentsialnosti/",
+    "slug": "politika-konfidentsialnosti",
+    "id": 374,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/poluchi-vostrebovannuyu-professiyu/",
+    "slug": "poluchi-vostrebovannuyu-professiyu",
+    "id": 26010,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/priemy-klassicheskogo-massazha-2/",
+    "slug": "priemy-klassicheskogo-massazha-2",
+    "id": 35537,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/professiya-pod-klyuch/",
+    "slug": "professiya-pod-klyuch",
+    "id": 31416,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/programma-modelirovaniya-figury-mikelandzhelo/",
+    "slug": "programma-modelirovaniya-figury-mikelandzhelo",
+    "id": 29915,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/protivopokazaniya-k-massazhu-2/",
+    "slug": "protivopokazaniya-k-massazhu-2",
+    "id": 35553,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/raspisanie-zanyatij-v-shkole/",
+    "slug": "raspisanie-zanyatij-v-shkole",
+    "id": 1030,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/rassrochka/",
+    "slug": "rassrochka",
+    "id": 14608,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/sam-sebe-skulptor/",
+    "slug": "sam-sebe-skulptor",
+    "id": 5232,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-apparatnyj-massazh/",
+    "slug": "seminar-apparatnyj-massazh",
+    "id": 11010,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-korrektsiya-rubtsov-i-rastyazhek/",
+    "slug": "seminar-korrektsiya-rubtsov-i-rastyazhek",
+    "id": 8790,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-krioobertyvanie/",
+    "slug": "seminar-krioobertyvanie",
+    "id": 8796,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-massazh-pri-osteohondroze/",
+    "slug": "seminar-massazh-pri-osteohondroze",
+    "id": 8800,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-massazh-shiatsu-img_9186/",
+    "has_widget": false
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-rabota-s-poyasnichno-kresttsovym-otdelom-2/",
+    "slug": "seminar-rabota-s-poyasnichno-kresttsovym-otdelom-2",
+    "id": 9338,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-shejno-vorotnikovaya-zona-v-polozhenii-lezha-na-spine/",
+    "slug": "seminar-shejno-vorotnikovaya-zona-v-polozhenii-lezha-na-spine",
+    "id": 8806,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-skolioz-i-narushenie-osanki-2/",
+    "slug": "seminar-skolioz-i-narushenie-osanki-2",
+    "id": 36032,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-termoobertyvanie/",
+    "slug": "seminar-termoobertyvanie",
+    "id": 8802,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-tochechnyj-massazh-shiatsu/",
+    "slug": "seminar-tochechnyj-massazh-shiatsu",
+    "id": 11010,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/seminar-vistseralnye-tehniki-v-massazhe-2/",
+    "slug": "seminar-vistseralnye-tehniki-v-massazhe-2",
+    "id": 19971,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/skulpturnyj-massazh-litsa-2-uroven-po-frantsuzskoj-metodike-zhoel-siokko-joelle-ciocco/",
+    "slug": "skulpturnyj-massazh-litsa-2-uroven-po-frantsuzskoj-metodike-zhoel-siokko-joelle-ciocco",
+    "id": 3497,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/skulpturnyj-massazh-litsa-2/",
+    "slug": "skulpturnyj-massazh-litsa-2",
+    "id": 35549,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/skulpturnyj-massazh-litsa-3-stupen/",
+    "slug": "skulpturnyj-massazh-litsa-3-stupen",
+    "id": 5662,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/sovershenstvo-masterstva-workshop/",
+    "slug": "sovershenstvo-masterstva-workshop",
+    "id": 28972,
+    "has_widget": true,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/stol-arenda/",
+    "slug": "stol-arenda",
+    "id": 4593,
+    "has_widget": false,
+    "endpoint": "posts"
+  },
+  {
+    "url": "https://shmmoscow.ru/tochechnyj-massazh/",
+    "slug": "tochechnyj-massazh",
+    "id": 3580,
+    "has_widget": true,
+    "endpoint": "posts"
+  }
+]

@@ -1,0 +1,194 @@
+[
+    
+    {
+      "id": "widget_002",
+      "type": "webinar",
+      "title": "Регистрация на комплексный массаж лица",
+      "topics": [],
+      "embed_html": "<div class='gc-embed'><script id=\"cfb75e0714b4bf2541726fdab5887bfef4e5502a\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1366551\"></script></div>",
+      "default_placement": {
+        "strategy": "bottom"
+      },
+      "__source__": {
+        "sheet": "Лист1"
+      }
+    },
+    {
+      "id": "widget_003",
+      "type": "webinar",
+      "title": "Регистрация на массаж шейно воротниковой зоны\n(вечная форма. Для любой страницы)",
+      "topics": [],
+      "embed_html": "<div class='gc-embed'><script id=\"a21597bfb2d1e4030d04b36ed0416114c7cc9593\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1358308\"></script></div>",
+      "default_placement": {
+        "strategy": "bottom"
+      },
+      "__source__": {
+        "sheet": "Лист1"
+      }
+    },
+    {
+      "id": "widget_004",
+      "type": "webinar",
+      "title": "Регистрация на комплексный массаж лица\n(вечная форма. Для любой страницы)",
+      "topics": [],
+      "embed_html": "<div class='gc-embed'><script id=\"b0b42eab2ece560a06212df0c72f43b13a948f89\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1490861\"></script></div>",
+      "default_placement": {
+        "strategy": "bottom"
+      },
+      "__source__": {
+        "sheet": "Лист1"
+      }
+    },
+    {
+      "id": "widget_005",
+      "type": "webinar",
+      "title": "Регистрация на расслабляющий массаж\n(вечная форма. Для любой страницы)",
+      "topics": [],
+      "embed_html": "<div class='gc-embed'><script id=\"b053ebb431397996698787e9cf3046ffb3f26dac\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1490882\"></script></div>",
+      "default_placement": {
+        "strategy": "bottom"
+      },
+      "__source__": {
+        "sheet": "Лист1"
+      }
+    },
+    {
+      "id": "widget_006",
+      "type": "webinar",
+      "title": "Регистрация на Скульптор идеальной фигуры\n(вечная форма. Для любой страницы)",
+      "topics": [],
+      "embed_html": "<div class='gc-embed'><script id=\"d9049eeffb3cf847a14668253f0cf1ecb18df6b2\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1490908\"></script></div>",
+      "default_placement": {
+        "strategy": "bottom"
+      },
+      "__source__": {
+        "sheet": "Лист1"
+      }
+    },
+    {
+      "id": "widget_007",
+      "type": "webinar",
+      "title": "Регистрация на Anti-age\n(вечная форма. Для любой страницы)",
+      "topics": [],
+      "embed_html": "<div class='gc-embed'><script id=\"75cd494f8cdc533cde77eb33fe1ff97e37c5c7d0\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1490913\"></script></div>",
+      "default_placement": {
+        "strategy": "bottom"
+      },
+      "__source__": {
+        "sheet": "Лист1"
+      }
+    },
+    {
+      "id": "widget_009",
+      "type": "lead_magnet",
+      "title": "Лидмагнит по медовому самомассажу",
+      "topics": [],
+      "embed_html": "<div class='gc-embed'><script id=\"3aed5276bd5b4e9c86cf07f23b2956e660e3f544\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1485772\"></script></div>",
+      "default_placement": {
+        "strategy": "top"
+      },
+      "__source__": {
+        "sheet": "Лист1"
+      }
+    },
+    {
+      "id": "widget_010",
+      "type": "lead_magnet",
+      "title": "ЛМ «5 способов от отёчности ног»",
+      "topics": [],
+      "embed_html": "<div class='gc-embed'><script id=\"6902d56699bed09aae857e4e9f355c663c214609\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1492010\"></script></div>",
+      "default_placement": {
+        "strategy": "top"
+      },
+      "__source__": {
+        "sheet": "Лист1"
+      }
+    },
+    {
+      "id": "widget_011",
+      "type": "lead_magnet",
+      "title": "ЛМ «Диагностика стоп»",
+      "topics": [],
+      "embed_html": "<div class='gc-embed'><script id=\"eb3fe6565d9a1a153bde44be3a6d03d8f66bd4bc\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1492040\"></script></div>",
+      "default_placement": {
+        "strategy": "top"
+      },
+      "__source__": {
+        "sheet": "Лист1"
+      }
+    },
+    {
+      "id": "widget_012",
+      "type": "lead_magnet",
+      "title": "ЛМ «7 советов по выбору обуви»",
+      "topics": [],
+      "embed_html": "<div class='gc-embed'><script id=\"798b327337aae20e36e9140bdfa56854dea890ed\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1492047\"></script></div>",
+      "default_placement": {
+        "strategy": "top"
+      },
+      "__source__": {
+        "sheet": "Лист1"
+      }
+    },
+    {
+      "id": "widget_013",
+      "type": "lead_magnet",
+      "title": "Урок «Упражнения от отёков ног»",
+      "topics": [],
+      "embed_html": "<div class='gc-embed'><script id=\"ce9541be21301a23c27edd3ca5078a87b7a56f41\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1492051\"></script></div>",
+      "default_placement": {
+        "strategy": "top"
+      },
+      "__source__": {
+        "sheet": "Лист1"
+      }
+    },
+      {
+        "id": "widget_014",
+        "type": "lead_magnet",
+        "title": "ВИДЕО – УРОК С ПРОСТЫМИ И ЭФФЕКТИВНЫМИ УПРАЖНЕНИЯМИ ОТ ХОЛКИ НА ШЕЕ",
+        "topics": ["шея", "холка", "осанка", "упражнения"],
+        "embed_html": "<div class='gc-embed'><script id=\"8de0405686d9b43ae9c5d851d417a97139719584\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1495179\"></script></div></div><!-- /wp:html -->",
+        "default_placement": { "strategy": "top", "index": 2 }
+      },
+      {
+        "id": "widget_015",
+        "type": "lead_magnet",
+        "title": "4 шага, чтобы убрать «косточку» на стопе — видео-урок с практикой от hallux valgus",
+        "topics": ["стопа", "hallux valgus", "косточка", "практика"],
+        "embed_html": "<div class='gc-embed'><script id=\"b822fa715dda4e56fc22d5074eaf3f5c17ce6cff\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1495184\"></script></div>",
+        "default_placement": { "strategy": "top", "index": 2 }
+      },
+      {
+        "id": "widget_016",
+        "type": "lead_magnet",
+        "title": "Практика самомассажа от отёков",
+        "topics": ["отёки", "лимфодренаж", "самомассаж"],
+        "embed_html": "<div class='gc-embed'><script id=\"feb4b5b25ecb0ea522644218e0ef6aedf33229bc\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1495194\"></script></div>",
+        "default_placement": { "strategy": "top", "index": 2 }
+      },
+      {
+        "id": "widget_017",
+        "type": "lead_magnet",
+        "title": "Экспресс-лифтинг лица за 5 минут",
+        "topics": ["лифтинг", "лицо", "омоложение", "массаж лица"],
+        "embed_html": "<div class='gc-embed'><script id=\"9e5f72cdba519ab88b7116ccbfee7ee11b0f3dce\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1495196\"></script></div>",
+        "default_placement": { "strategy": "top", "index": 2 }
+      },
+      {
+        "id": "widget_018",
+        "type": "lead_magnet",
+        "title": "Глубокая перезагрузка — видео-урок с практикой релакс-массажа",
+        "topics": ["релакс", "расслабление", "стресс", "релакс-массаж"],
+        "embed_html": "<div class='gc-embed'><script id=\"d0fefbe539f69fe7d7ca99ac43f2214118b8e1a4\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1495200\"></script></div>",
+        "default_placement": { "strategy": "top", "index": 2 }
+      },
+      {
+        "id": "widget_019",
+        "type": "lead_magnet",
+        "title": "Проработка жевательных мышц — видео-урок с техникой буккального массажа",
+        "topics": ["жевательные мышцы", "буккальный массаж", "лицо", "омоложение"],
+        "embed_html": "<div class='gc-embed'><script id=\"e504a3bf80fab3e27bd9b8d09e102100db5ed61f\" src=\"https://shkolamasterov.online/pl/lite/widget/script?id=1495441\"></script></div>",
+        "default_placement": { "strategy": "top", "index": 2 }
+      }
+  ]
