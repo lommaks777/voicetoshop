@@ -51,6 +51,48 @@ async def get_user_context(tg_id: int) -> dict:
     return None
 
 
+async def process_text_input(message: Message, text: str, processing_msg: Message, sheet_id: str, tg_id: int):
+    """
+    Shared business logic for processing text input (from voice transcription or direct text)
+    
+    Args:
+        message: Original Telegram message object
+        text: Text to process (transcription or direct text input)
+        processing_msg: Status message to update with results
+        sheet_id: User's Google Sheets ID
+        tg_id: User's Telegram ID
+    """
+    try:
+        # Privacy-compliant logging (no message content, only length)
+        logger.info(f"User <TG_ID:{tg_id}> processing text input, length: {len(text)} chars")
+        
+        # Classify message type
+        message_type = await ai_service.classify_message(text)
+        logger.info(f"Message classified as: {message_type}")
+        
+        # Route to appropriate handler based on classification
+        if message_type == "log_session":
+            await handle_session(message, processing_msg, text, sheet_id, tg_id)
+        elif message_type == "client_update":
+            await handle_client_update(message, processing_msg, text, sheet_id, tg_id)
+        elif message_type == "booking":
+            await handle_booking(message, processing_msg, text, sheet_id, tg_id)
+        elif message_type == "client_query":
+            await handle_client_query(message, processing_msg, text, sheet_id, tg_id)
+        elif message_type == "consultation":
+            await processing_msg.edit_text(
+                "Для просмотра информации о клиенте используйте команду:\n"
+                "/client <имя клиента>"
+            )
+        else:
+            # Default to session logging
+            await handle_session(message, processing_msg, text, sheet_id, tg_id)
+            
+    except Exception as e:
+        logger.error(f"Error processing text input: {e}", exc_info=True)
+        await processing_msg.edit_text(f"❌ Ошибка обработки сообщения: {str(e)}")
+
+
 @dp.message(Command("start"))
 async def cmd_start(message: Message):
     """Handle /start command - onboarding or welcome back"""
@@ -60,7 +102,7 @@ async def cmd_start(message: Message):
     if user_exists:
         await message.answer(
             "Добро пожаловать! 🙋‍♀️\n\n"
-            "Отправьте голосовое сообщение о сеансе массажа, и я занесу данные в вашу таблицу.\n\n"
+            "Отправьте голосовое или текстовое сообщение о сеансе массажа, и я занесу данные в вашу таблицу.\n\n"
             "Команды:\n"
             "/client <имя> - посмотреть информацию о клиенте"
         )
@@ -283,7 +325,7 @@ async def cmd_set_timezone(message: Message):
 
 @dp.message(F.text)
 async def handle_text(message: Message):
-    """Handle text messages - onboarding URL, city input, or client lookup"""
+    """Handle text messages - onboarding URL, city input, or CRM operations"""
     tg_id = message.from_user.id
     
     # Check if user is in onboarding - sheet URL stage
@@ -296,6 +338,11 @@ async def handle_text(message: Message):
         await process_city_input(message)
         return
     
+    # Check if message is a command (starts with /)
+    if message.text and message.text.startswith("/"):
+        # Let command handlers process it
+        return
+    
     # Check if user is registered
     context = await get_user_context(tg_id)
     if not context:
@@ -305,11 +352,21 @@ async def handle_text(message: Message):
         )
         return
     
-    # Handle regular text (future: could be natural language queries)
-    await message.answer(
-        "Для записи сеанса отправьте голосовое сообщение.\n\n"
-        "Для просмотра клиента используйте: /client <имя>"
-    )
+    sheet_id = context['sheet_id']
+    
+    # Send processing message
+    processing_msg = await message.answer("⌛ Думаю...")
+    
+    try:
+        # Privacy-compliant logging (no message content, only length)
+        logger.info(f"User <TG_ID:{tg_id}> sent text message, length: {len(message.text)} chars")
+        
+        # Process text input using shared logic
+        await process_text_input(message, message.text, processing_msg, sheet_id, tg_id)
+        
+    except Exception as e:
+        logger.error(f"Error processing text message: {e}", exc_info=True)
+        await processing_msg.edit_text(f"❌ Ошибка обработки: {str(e)}")
 
 
 async def process_sheet_url(message: Message):
@@ -388,7 +445,7 @@ async def process_city_input(message: Message):
                 f"✅ <b>Готово!</b>\n\n"
                 f"Ваша таблица подключена.\n"
                 f"Часовой пояс: {timezone}\n\n"
-                f"Теперь можете отправлять голосовые сообщения о сеансах массажа.",
+                f"Теперь можете отправлять голосовые или текстовые сообщения о сеансах массажа.",
                 parse_mode=ParseMode.HTML
             )
             
@@ -444,25 +501,8 @@ async def handle_voice(message: Message):
         # Privacy-compliant logging (no transcription content, only length)
         logger.info(f"User <TG_ID:{tg_id}> sent voice message, transcription length: {len(transcription)} chars")
         
-        # Classify message type
-        message_type = await ai_service.classify_message(transcription)
-        
-        if message_type == "log_session":
-            await handle_session(message, processing_msg, transcription, sheet_id, tg_id)
-        elif message_type == "client_update":
-            await handle_client_update(message, processing_msg, transcription, sheet_id, tg_id)
-        elif message_type == "booking":
-            await handle_booking(message, processing_msg, transcription, sheet_id, tg_id)
-        elif message_type == "client_query":
-            await handle_client_query(message, processing_msg, transcription, sheet_id, tg_id)
-        elif message_type == "consultation":
-            await processing_msg.edit_text(
-                "Для просмотра информации о клиенте используйте команду:\n"
-                "/client <имя клиента>"
-            )
-        else:
-            # Default to session logging
-            await handle_session(message, processing_msg, transcription, sheet_id, tg_id)
+        # Process transcription using shared logic
+        await process_text_input(message, transcription, processing_msg, sheet_id, tg_id)
             
     except Exception as e:
         logger.error(f"Error processing voice message: {e}")
