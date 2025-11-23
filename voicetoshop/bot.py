@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.enums import ParseMode
 import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -32,6 +32,20 @@ scheduler = AsyncIOScheduler(timezone=pytz.timezone(Config.TIMEZONE))
 # Onboarding state tracking (in-memory)
 onboarding_states = {}  # {tg_id: "AWAITING_SHEET_URL" or "AWAITING_CITY"}
 onboarding_sheet_ids = {}  # {tg_id: sheet_id} - temporary storage during onboarding
+
+
+def get_main_menu() -> ReplyKeyboardMarkup:
+    """
+    Create persistent main menu keyboard with 4 buttons
+    
+    Returns:
+        ReplyKeyboardMarkup with main menu buttons
+    """
+    keyboard = [
+        [KeyboardButton(text="📅 План на сегодня"), KeyboardButton(text="📊 Моя База")],
+        [KeyboardButton(text="❓ Помощь"), KeyboardButton(text="🔄 Начать заново")]
+    ]
+    return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
 
 
 async def get_user_context(tg_id: int) -> dict:
@@ -104,7 +118,8 @@ async def cmd_start(message: Message):
             "Добро пожаловать! 🙋‍♀️\n\n"
             "Отправьте голосовое или текстовое сообщение о сеансе массажа, и я занесу данные в вашу таблицу.\n\n"
             "Команды:\n"
-            "/client <имя> - посмотреть информацию о клиенте"
+            "/client <имя> - посмотреть информацию о клиенте",
+            reply_markup=get_main_menu()
         )
     else:
         await start_onboarding(message)
@@ -141,7 +156,8 @@ async def cmd_client(message: Message):
     if not context:
         await message.answer(
             "❌ Вы не зарегистрированы.\n\n"
-            "Отправьте /start для регистрации."
+            "Отправьте /start для регистрации.",
+            reply_markup=get_main_menu()
         )
         return
     
@@ -157,7 +173,8 @@ async def cmd_client(message: Message):
         await message.answer(
             "❌ Укажите имя клиента\n\n"
             "<b>Использование:</b> /client Анна Иванова",
-            parse_mode=ParseMode.HTML
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_main_menu()
         )
         return
     
@@ -169,7 +186,7 @@ async def cmd_client(message: Message):
         client_info = await sheets_service.get_client(sheet_id, client_name)
         
         if not client_info:
-            await message.answer(f"❌ Клиент '{client_name}' не найден")
+            await message.answer(f"❌ Клиент '{client_name}' не найден", reply_markup=get_main_menu())
             return
         
         # Privacy-compliant logging
@@ -228,11 +245,11 @@ async def cmd_client(message: Message):
                 response += f"Использована: {client_info['name']}\n"
                 response += f"Если это не та клиентка, уточните запрос."
         
-        await message.answer(response, parse_mode=ParseMode.HTML)
+        await message.answer(response, parse_mode=ParseMode.HTML, reply_markup=get_main_menu())
         
     except Exception as e:
         logger.error(f"Error getting client info: {e}", exc_info=True)
-        await message.answer(f"❌ Ошибка получения данных: {str(e)}")
+        await message.answer(f"❌ Ошибка получения данных: {str(e)}", reply_markup=get_main_menu())
 
 
 @dp.message(Command("stats"))
@@ -244,11 +261,12 @@ async def cmd_stats(message: Message):
         await message.answer(
             f"📊 <b>Статистика бота</b>\n\n"
             f"👥 Всего пользователей: {total_users}",
-            parse_mode=ParseMode.HTML
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_main_menu()
         )
     except Exception as e:
         logger.error(f"Error getting stats: {e}")
-        await message.answer("❌ Ошибка получения статистики")
+        await message.answer("❌ Ошибка получения статистики", reply_markup=get_main_menu())
 
 
 @dp.message(Command("set_timezone"))
@@ -262,7 +280,8 @@ async def cmd_set_timezone(message: Message):
     if not context:
         await message.answer(
             "❌ Вы не зарегистрированы.\n\n"
-            "Отправьте /start для регистрации."
+            "Отправьте /start для регистрации.",
+            reply_markup=get_main_menu()
         )
         return
     
@@ -278,7 +297,8 @@ async def cmd_set_timezone(message: Message):
             "  /set_timezone Санкт-Петербург\n"
             "  /set_timezone Новосибирск\n"
             "  /set_timezone Владивосток",
-            parse_mode=ParseMode.HTML
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_main_menu()
         )
         return
     
@@ -295,7 +315,8 @@ async def cmd_set_timezone(message: Message):
         if not timezone:
             await processing_msg.edit_text(
                 f"❌ Не удалось определить часовой пояс для города '{city}'.\n\n"
-                "Попробуйте указать более крупный город в вашем регионе."
+                "Попробуйте указать более крупный город в вашем регионе.",
+                reply_markup=get_main_menu()
             )
             return
         
@@ -308,19 +329,186 @@ async def cmd_set_timezone(message: Message):
                 f"🌍 Город: {city}\n"
                 f"⏰ Часовой пояс: {timezone}\n\n"
                 f"Утренние уведомления будут приходить в 09:00 по вашему местному времени.",
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_main_menu()
             )
             logger.info(f"User <TG_ID:{tg_id}> updated timezone to {timezone}")
         else:
             await processing_msg.edit_text(
-                "❌ Ошибка обновления часового пояса. Попробуйте позже."
+                "❌ Ошибка обновления часового пояса. Попробуйте позже.",
+                reply_markup=get_main_menu()
             )
         
     except Exception as e:
         logger.error(f"Error updating timezone: {e}")
         await processing_msg.edit_text(
-            f"❌ Ошибка обновления: {str(e)}"
+            f"❌ Ошибка обновления: {str(e)}",
+            reply_markup=get_main_menu()
         )
+
+
+@dp.message(F.text == "📅 План на сегодня")
+async def menu_daily_plan(message: Message):
+    """Handle 'План на сегодня' button - show daily schedule"""
+    tg_id = message.from_user.id
+    logger.info(f"User <TG_ID:{tg_id}> requested daily plan")
+    
+    # Check if user is registered
+    context = await get_user_context(tg_id)
+    if not context:
+        await message.answer(
+            "❌ Вы не зарегистрированы.\n\n"
+            "Отправьте /start для регистрации.",
+            reply_markup=get_main_menu()
+        )
+        return
+    
+    sheet_id = context['sheet_id']
+    
+    try:
+        # Get user's timezone and today's date
+        user_timezone_str = await db_service.get_user_timezone(tg_id)
+        try:
+            user_tz = pytz.timezone(user_timezone_str)
+            user_local_time = datetime.now(user_tz)
+            today_date = user_local_time.strftime('%Y-%m-%d')
+            today_display = user_local_time.strftime('%d.%m')
+        except Exception as tz_error:
+            logger.warning(f"Failed to parse timezone '{user_timezone_str}': {tz_error}, using default")
+            from config import Config
+            tz = pytz.timezone(Config.TIMEZONE)
+            user_local_time = datetime.now(tz)
+            today_date = user_local_time.strftime('%Y-%m-%d')
+            today_display = user_local_time.strftime('%d.%m')
+        
+        # Get daily schedule
+        appointments = await sheets_service.get_daily_schedule(sheet_id, today_date)
+        
+        if not appointments:
+            await message.answer(
+                f"📅 <b>План на сегодня ({today_display}):</b>\n\n"
+                "У вас нет запланированных сеансов.\n\n"
+                "Хорошего дня! ☀️",
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_main_menu()
+            )
+            return
+        
+        # Format message
+        response = f"📅 <b>План на сегодня ({today_display}):</b>\n\n"
+        
+        for appointment in appointments:
+            time = appointment.get('time', '')
+            client_name = appointment.get('client_name', 'Неизвестно')
+            service_type = appointment.get('service_type', '')
+            duration = appointment.get('duration', '')
+            notes = appointment.get('notes', '')
+            
+            response += f"<b>{time}</b> — {client_name}"
+            if service_type:
+                response += f" ({service_type})"
+            response += "\n"
+            
+            if duration:
+                try:
+                    dur_int = int(duration)
+                    response += f"{dur_int} минут\n"
+                except:
+                    pass
+            
+            if notes:
+                response += f"❗ <b>Заметка:</b> {notes}\n"
+            
+            response += "\n"
+        
+        response += "Хорошего рабочего дня! ☀️"
+        
+        await message.answer(
+            response,
+            parse_mode=ParseMode.HTML,
+            reply_markup=get_main_menu()
+        )
+        
+    except Exception as e:
+        logger.error(f"Error getting daily plan: {e}", exc_info=True)
+        await message.answer(
+            "❌ Ошибка получения плана на сегодня.",
+            reply_markup=get_main_menu()
+        )
+
+
+@dp.message(F.text == "📊 Моя База")
+async def menu_my_base(message: Message):
+    """Handle 'Моя База' button - send link to user's Google Sheet"""
+    tg_id = message.from_user.id
+    logger.info(f"User <TG_ID:{tg_id}> requested sheet link")
+    
+    # Check if user is registered
+    context = await get_user_context(tg_id)
+    if not context:
+        await message.answer(
+            "❌ Вы не зарегистрированы.\n\n"
+            "Отправьте /start для регистрации.",
+            reply_markup=get_main_menu()
+        )
+        return
+    
+    sheet_id = context['sheet_id']
+    sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
+    
+    await message.answer(
+        f"📊 <b>Ваша База Клиентов</b>\n\n"
+        f"🔗 <a href='{sheet_url}'>Открыть таблицу</a>\n\n"
+        f"Здесь хранятся все данные о клиентах, сеансах и записях.",
+        parse_mode=ParseMode.HTML,
+        reply_markup=get_main_menu(),
+        disable_web_page_preview=True
+    )
+
+
+@dp.message(F.text == "❓ Помощь")
+async def menu_help(message: Message):
+    """Handle 'Помощь' button - send usage instructions"""
+    tg_id = message.from_user.id
+    logger.info(f"User <TG_ID:{tg_id}> requested help")
+    
+    help_text = (
+        "❓ <b>Как использовать бота</b>\n\n"
+        "<b>📝 Запись сеанса:</b>\n"
+        "Отправьте голосовое или текстовое сообщение с информацией:\n"
+        "• Имя клиента\n"
+        "• Услуга (например, ШВЗ, массаж спины)\n"
+        "• Цена\n"
+        "• Длительность (опционально)\n"
+        "• Заметки (опционально)\n\n"
+        "<b>📅 Создание записи:</b>\n"
+        "Скажите: \"Запись на Анну завтра в 14:00\"\n\n"
+        "<b>📝 Добавление заметки к клиенту:</b>\n"
+        "Скажите: \"Анна боится массажа шеи\"\n\n"
+        "<b>🔍 Информация о клиенте:</b>\n"
+        "<code>/client Анна Иванова</code>\n\n"
+        "<b>🌍 Настройка часового пояса:</b>\n"
+        "<code>/set_timezone Москва</code>\n\n"
+        "<b>📅 План на сегодня:</b> Нажмите кнопку ниже\n"
+        "<b>📊 Моя База:</b> Ссылка на вашу таблицу\n\n"
+        "💡 <b>Совет:</b> Говорите естественно, я понимаю контекст!"
+    )
+    
+    await message.answer(
+        help_text,
+        parse_mode=ParseMode.HTML,
+        reply_markup=get_main_menu()
+    )
+
+
+@dp.message(F.text == "🔄 Начать заново")
+async def menu_restart(message: Message):
+    """Handle 'Начать заново' button - re-run /start"""
+    tg_id = message.from_user.id
+    logger.info(f"User <TG_ID:{tg_id}> requested restart")
+    
+    # Call the cmd_start function
+    await cmd_start(message)
 
 
 @dp.message(F.text)
@@ -348,14 +536,15 @@ async def handle_text(message: Message):
     if not context:
         await message.answer(
             "❌ Вы не зарегистрированы.\n\n"
-            "Отправьте /start для регистрации."
+            "Отправьте /start для регистрации.",
+            reply_markup=get_main_menu()
         )
         return
     
     sheet_id = context['sheet_id']
     
     # Send processing message
-    processing_msg = await message.answer("⌛ Думаю...")
+    processing_msg = await message.answer("⌛ Думаю...", reply_markup=get_main_menu())
     
     try:
         # Privacy-compliant logging (no message content, only length)
@@ -390,7 +579,8 @@ async def process_sheet_url(message: Message):
                 f"✅ Таблица проверена!\n\n"
                 f"В каком городе вы работаете? (Нужно для настройки времени уведомлений)\n\n"
                 f"Примеры: Москва, Санкт-Петербург, Новосибирск",
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_main_menu()
             )
             
             logger.info(f"Sheet validated for TG_ID {tg_id}, awaiting city input")
@@ -446,7 +636,8 @@ async def process_city_input(message: Message):
                 f"Ваша таблица подключена.\n"
                 f"Часовой пояс: {timezone}\n\n"
                 f"Теперь можете отправлять голосовые или текстовые сообщения о сеансах массажа.",
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_main_menu()
             )
             
             logger.info(f"User onboarded: TG_ID {tg_id}, Sheet {sheet_id}, Timezone {timezone}")
@@ -472,14 +663,15 @@ async def handle_voice(message: Message):
     if not context:
         await message.answer(
             "❌ Вы не зарегистрированы.\n\n"
-            "Отправьте /start для регистрации."
+            "Отправьте /start для регистрации.",
+            reply_markup=get_main_menu()
         )
         return
     
     sheet_id = context['sheet_id']
     
     # Send processing message
-    processing_msg = await message.answer("🎧 Обрабатываю голосовое сообщение...")
+    processing_msg = await message.answer("🎧 Обрабатываю голосовое сообщение...", reply_markup=get_main_menu())
     
     try:
         # Download voice file
@@ -495,7 +687,7 @@ async def handle_voice(message: Message):
             os.remove(voice_path)
         
         if not transcription:
-            await processing_msg.edit_text("🤷‍♂️ Не удалось распознать аудио. Попробуйте еще раз.")
+            await processing_msg.edit_text("🤷‍♂️ Не удалось распознать аудио. Попробуйте еще раз.", reply_markup=get_main_menu())
             return
         
         # Privacy-compliant logging (no transcription content, only length)
@@ -506,7 +698,7 @@ async def handle_voice(message: Message):
             
     except Exception as e:
         logger.error(f"Error processing voice message: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обработки сообщения: {str(e)}")
+        await processing_msg.edit_text(f"❌ Ошибка обработки сообщения: {str(e)}", reply_markup=get_main_menu())
 
 
 async def handle_session(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
@@ -536,7 +728,8 @@ async def handle_session(message: Message, processing_msg: Message, transcriptio
                 "• Имя клиента\n"
                 "• Услугу (например, ШВЗ, массаж спины)\n"
                 "• Цену",
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_main_menu()
             )
             return
         
@@ -568,7 +761,7 @@ async def handle_session(message: Message, processing_msg: Message, transcriptio
             if session_data.next_appointment_date:
                 response += f"\n🗓️ <b>Следующая запись:</b> {session_data.next_appointment_date}\n"
             
-            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
+            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML, reply_markup=get_main_menu())
             
         except PermissionError:
             service_email = Config.get_service_account_email()
@@ -584,12 +777,13 @@ async def handle_session(message: Message, processing_msg: Message, transcriptio
         except Exception as e:
             logger.error(f"Error logging session: {e}")
             await processing_msg.edit_text(
-                f"❌ Ошибка записи в таблицу:\n{str(e)}"
+                f"❌ Ошибка записи в таблицу:\n{str(e)}",
+                reply_markup=get_main_menu()
             )
             
     except Exception as e:
         logger.error(f"Error handling session: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обработки сеанса: {str(e)}")
+        await processing_msg.edit_text(f"❌ Ошибка обработки сеанса: {str(e)}", reply_markup=get_main_menu())
 
 
 async def handle_client_update(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
@@ -602,7 +796,8 @@ async def handle_client_update(message: Message, processing_msg: Message, transc
             await processing_msg.edit_text(
                 "❌ Не удалось извлечь информацию о клиенте.\n\n"
                 "Укажите имя клиента и заметку.",
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_main_menu()
             )
             return
         
@@ -627,16 +822,17 @@ async def handle_client_update(message: Message, processing_msg: Message, transc
             response += f"📖 <b>Раздел:</b> {field_name}\n\n"
             response += f"✅ Добавлено: \"{client_edit_data.content_to_append}\""
             
-            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
+            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML, reply_markup=get_main_menu())
             logger.info(f"User <TG_ID:{tg_id}> updated client info")
         else:
             await processing_msg.edit_text(
-                "❌ Ошибка обновления информации."
+                "❌ Ошибка обновления информации.",
+                reply_markup=get_main_menu()
             )
         
     except Exception as e:
         logger.error(f"Error handling client update: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обновления информации: {str(e)}")
+        await processing_msg.edit_text(f"❌ Ошибка обновления информации: {str(e)}", reply_markup=get_main_menu())
 
 
 async def handle_booking(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
@@ -663,7 +859,8 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
                 "• Имя клиента\n"
                 "• Дату (например, 'завтра', 'во вторник')\n"
                 "• Время (например, '14:00', '3 PM')",
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_main_menu()
             )
             return
         
@@ -717,7 +914,7 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
             if booking_data.notes:
                 response += f"\n📝 <b>Заметка:</b> {booking_data.notes}"
             
-            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
+            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML, reply_markup=get_main_menu())
             
         except PermissionError:
             service_email = Config.get_service_account_email()
@@ -733,12 +930,13 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
         except Exception as e:
             logger.error(f"Error adding booking: {e}")
             await processing_msg.edit_text(
-                f"❌ Ошибка создания записи:\n{str(e)}"
+                f"❌ Ошибка создания записи:\n{str(e)}",
+                reply_markup=get_main_menu()
             )
             
     except Exception as e:
         logger.error(f"Error handling booking: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обработки записи: {str(e)}")
+        await processing_msg.edit_text(f"❌ Ошибка обработки записи: {str(e)}", reply_markup=get_main_menu())
 
 
 async def handle_client_query(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
@@ -751,7 +949,8 @@ async def handle_client_query(message: Message, processing_msg: Message, transcr
             await processing_msg.edit_text(
                 "❌ Не удалось понять запрос.\n\n"
                 "Укажите имя клиента.",
-                parse_mode=ParseMode.HTML
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_main_menu()
             )
             return
         
@@ -759,7 +958,7 @@ async def handle_client_query(message: Message, processing_msg: Message, transcr
         client_info = await sheets_service.get_client(sheet_id, client_query_data.client_name)
         
         if not client_info:
-            await processing_msg.edit_text(f"❌ Клиент '{client_query_data.client_name}' не найден")
+            await processing_msg.edit_text(f"❌ Клиент '{client_query_data.client_name}' не найден", reply_markup=get_main_menu())
             return
         
         # Privacy-compliant logging
@@ -822,11 +1021,11 @@ async def handle_client_query(message: Message, processing_msg: Message, transcr
                 response += f"Использована: {client_info['name']}\n"
                 response += f"Если это не та клиентка, уточните запрос."
         
-        await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
+        await processing_msg.edit_text(response, parse_mode=ParseMode.HTML, reply_markup=get_main_menu())
         
     except Exception as e:
         logger.error(f"Error handling client query: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка получения данных: {str(e)}")
+        await processing_msg.edit_text(f"❌ Ошибка получения данных: {str(e)}", reply_markup=get_main_menu())
 
 
 async def send_morning_briefs():
@@ -914,7 +1113,8 @@ async def send_morning_briefs():
                 await bot.send_message(
                     chat_id=tg_id,
                     text=message,
-                    parse_mode=ParseMode.HTML
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=get_main_menu()
                 )
                 
                 sent_count += 1
