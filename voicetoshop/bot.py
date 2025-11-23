@@ -162,6 +162,22 @@ async def cmd_client(message: Message):
             for session in session_history[-5:]:  # Last 5 sessions
                 response += f"  • {session['date']}: {session['service']} ({session['price']}₽)\n"
         
+        # Show future bookings
+        next_bookings = client_info.get('next_bookings', [])
+        if next_bookings:
+            response += f"\n🗓 <b>Будущие записи:</b>\n"
+            for booking in next_bookings:
+                date_formatted = booking['date']  # Already in YYYY-MM-DD format
+                time_str = booking['time']
+                service_str = booking.get('service', '')
+                
+                response += f"  • {date_formatted} в {time_str}"
+                if service_str:
+                    response += f" ({service_str})"
+                response += "\n"
+        else:
+            response += f"\n🗓 <b>Будущие записи:</b> Нет\n"
+        
         # Add ambiguity warning if applicable
         if client_info.get('_is_ambiguous', False):
             alternatives = client_info.get('_alternatives', [])
@@ -741,6 +757,22 @@ async def handle_client_query(message: Message, processing_msg: Message, transcr
             response += f"\n📋 <b>Последние сеансы:</b>\n"
             for session in session_history[-5:]:  # Last 5 sessions
                 response += f"  • {session['date']}: {session['service']} ({session['price']}₽)\n"
+        
+        # Show future bookings
+        next_bookings = client_info.get('next_bookings', [])
+        if next_bookings:
+            response += f"\n🗓 <b>Будущие записи:</b>\n"
+            for booking in next_bookings:
+                date_formatted = booking['date']  # Already in YYYY-MM-DD format
+                time_str = booking['time']
+                service_str = booking.get('service', '')
+                
+                response += f"  • {date_formatted} в {time_str}"
+                if service_str:
+                    response += f" ({service_str})"
+                response += "\n"
+        else:
+            response += f"\n🗓 <b>Будущие записи:</b> Нет\n"
         
         # Add ambiguity warning if applicable
         if client_info.get('_is_ambiguous', False):

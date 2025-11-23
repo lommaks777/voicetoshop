@@ -193,16 +193,22 @@ class SheetsService:
             current_date = datetime.now().strftime('%Y-%m-%d')
             current_date_short = datetime.now().strftime('%d.%m')
             
-            # 1. Append to Sessions tab
+            # 1. Append to Sessions tab with strict positioning
             session_row = [
                 current_date,
                 session_data['client_name'],
                 session_data['service_name'],
-                session_data.get('duration', ''),
-                session_data['price'],
-                session_data.get('session_notes', '')
+                str(session_data.get('duration', '')),
+                str(session_data['price']),
+                str(session_data.get('session_notes', ''))
             ]
-            await sessions_ws.append_row(session_row)
+            
+            # Get all values to calculate next row position
+            all_sessions = await sessions_ws.get_all_values()
+            next_row = len(all_sessions) + 1
+            
+            # Use explicit range to prevent column shift
+            await sessions_ws.update(range_name=f"A{next_row}", values=[session_row])
             logger.info(f"Logged session for client: {session_data['client_name']}")
             
             # 2. Upsert client in Clients tab
@@ -327,17 +333,18 @@ class SheetsService:
     
     async def get_client(self, sheet_id: str, client_name: str) -> Optional[Dict[str, Any]]:
         """
-        Get client information with session history and ambiguity detection
+        Get client information with session history, ambiguity detection, and future bookings
         
         Args:
             sheet_id: User's Google Sheet ID
             client_name: Client name to lookup (supports partial matching)
             
         Returns:
-            Dict with client data, session history, and ambiguity flags:
+            Dict with client data, session history, future bookings, and ambiguity flags:
             - All standard client fields (name, phone_contact, anamnesis, etc.)
             - _is_ambiguous: Boolean flag indicating multiple matches
             - _alternatives: List of alternative client names if ambiguous
+            - next_bookings: List of future appointments from Schedule tab
             Returns None if not found
         """
         try:
@@ -438,7 +445,72 @@ class SheetsService:
                             'notes': session_record.get('Session_Notes', '')
                         })
             
-            # Phase 4: Return result with ambiguity metadata
+            # Phase 4: Get future bookings from Schedule tab
+            from datetime import datetime
+            import pytz
+            
+            next_bookings = []
+            try:
+                # Try to get Schedule worksheet
+                schedule_ws = await spreadsheet.worksheet(self.SCHEDULE_SHEET)
+                schedule_data = await schedule_ws.get_all_values()
+                
+                if len(schedule_data) > 1:
+                    schedule_headers = schedule_data[0]
+                    
+                    # Get current date (use timezone-aware comparison)
+                    try:
+                        tz = pytz.timezone('Europe/Moscow')  # Default timezone
+                        current_date = datetime.now(tz).date()
+                    except:
+                        current_date = datetime.now().date()
+                    
+                    for schedule_row in schedule_data[1:]:
+                        while len(schedule_row) < len(schedule_headers):
+                            schedule_row.append('')
+                        
+                        schedule_record = dict(zip(schedule_headers, schedule_row))
+                        
+                        # Case-insensitive name matching (stripped)
+                        record_client_name = schedule_record.get('Client_Name', '').strip()
+                        if record_client_name.lower() != selected_name.strip().lower():
+                            continue
+                        
+                        # Date comparison: parse date string and compare
+                        date_str = schedule_record.get('Date', '').strip()
+                        if not date_str:
+                            continue
+                        
+                        try:
+                            # Parse YYYY-MM-DD format
+                            record_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                            
+                            # Include all records where record_date >= current_date
+                            if record_date >= current_date:
+                                # Check status (skip cancelled)
+                                status = schedule_record.get('Status', '').strip().lower()
+                                if status == 'cancelled':
+                                    continue
+                                
+                                next_bookings.append({
+                                    'date': date_str,
+                                    'time': schedule_record.get('Time', ''),
+                                    'service': schedule_record.get('Service_Type', ''),
+                                    'duration': schedule_record.get('Duration', ''),
+                                    'notes': schedule_record.get('Notes', '')
+                                })
+                        except ValueError:
+                            # Invalid date format, skip this record
+                            continue
+                    
+                    # Sort by date + time ascending
+                    next_bookings.sort(key=lambda x: (x['date'], x['time']))
+                    
+            except Exception as schedule_error:
+                # Schedule sheet doesn't exist or other error - not critical
+                logger.debug(f"Could not fetch Schedule data: {schedule_error}")
+            
+            # Phase 5: Return result with ambiguity metadata and future bookings
             return {
                 'name': selected_record.get('Name', ''),
                 'phone_contact': selected_record.get('Phone_Contact', ''),
@@ -448,6 +520,7 @@ class SheetsService:
                 'last_visit_date': selected_record.get('Last_Visit_Date', ''),
                 'next_reminder': selected_record.get('Next_Reminder', ''),
                 'session_history': session_history,
+                'next_bookings': next_bookings,
                 '_is_ambiguous': is_ambiguous,
                 '_alternatives': alternatives
             }
@@ -506,19 +579,23 @@ class SheetsService:
             # Get Schedule worksheet
             schedule_ws = await spreadsheet.worksheet(self.SCHEDULE_SHEET)
             
-            # Prepare row data
+            # Prepare row data with strict positioning
             booking_row = [
-                booking_data['date'],
-                booking_data['time'],
-                booking_data['client_name'],
-                booking_data.get('service_name') or 'Не указано',
-                booking_data.get('duration', ''),
+                str(booking_data['date']),
+                str(booking_data['time']),
+                str(booking_data['client_name']),
+                str(booking_data.get('service_name') or 'Не указано'),
+                str(booking_data.get('duration', '')),
                 'Confirmed',
-                booking_data.get('notes', '')
+                str(booking_data.get('notes', ''))
             ]
             
-            # Append to Schedule sheet
-            await schedule_ws.append_row(booking_row)
+            # Get all values to calculate next row position
+            all_bookings = await schedule_ws.get_all_values()
+            next_row = len(all_bookings) + 1
+            
+            # Use explicit range to prevent column shift
+            await schedule_ws.update(range_name=f"A{next_row}", values=[booking_row])
             logger.info(f"Added booking for {booking_data['client_name']} on {booking_data['date']} at {booking_data['time']}")
             
         except PermissionError:
