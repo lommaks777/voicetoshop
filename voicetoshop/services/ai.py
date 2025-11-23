@@ -1,11 +1,12 @@
 import logging
 import os
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Literal
 from pathlib import Path
 from pydantic import BaseModel, Field
 from openai import AsyncOpenAI
 from config import Config
+import pytz
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,26 @@ def normalize_product_name(name: str) -> str:
 class ClientEditData(BaseModel):
     """Client information edit data"""
     client_name: str = Field(description="Client full name")
-    notes: str = Field(description="Notes or additional information to add about the client")
+    target_field: Literal['anamnesis', 'notes', 'contacts'] = Field(description="Target field to update")
+    content_to_append: str = Field(description="Content to append to the client record")
+
+
+class BookingData(BaseModel):
+    """Future booking/appointment data"""
+    client_name: str = Field(description="Client full name")
+    date: str = Field(description="Appointment date in YYYY-MM-DD format")
+    time: str = Field(description="Appointment time in HH:MM format (24-hour)")
+    service_name: Optional[str] = Field(default=None, description="Type of service")
+    duration: Optional[int] = Field(default=None, description="Duration in minutes", gt=0)
+    notes: Optional[str] = Field(default=None, description="Special instructions or notes")
+
+
+class ClientQueryData(BaseModel):
+    """Client information query data"""
+    client_name: str = Field(description="Client name to search for")
+    query_topic: Literal['general', 'medical', 'financial', 'history'] = Field(
+        description="Category of query to determine response focus"
+    )
 
 
 # Pydantic Models for Structured Outputs
@@ -107,6 +127,68 @@ class AIService:
     """OpenAI integration for transcription and NLP"""
     
     @staticmethod
+    async def detect_timezone(city_name: str) -> Optional[str]:
+        """
+        Detect IANA timezone identifier from city name using AI
+        
+        Args:
+            city_name: City name provided by user (in any language)
+            
+        Returns:
+            IANA timezone identifier string or None if detection fails
+        """
+        try:
+            response = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are a timezone detection expert. Given a city name, return ONLY the IANA timezone identifier.
+
+Examples:
+- Москва → Europe/Moscow
+- Санкт-Петербург → Europe/Moscow
+- Новосибирск → Asia/Novosibirsk
+- Владивосток → Asia/Vladivostok
+- Екатеринбург → Asia/Yekaterinburg
+- Иркутск → Asia/Irkutsk
+- Красноярск → Asia/Krasnoyarsk
+- Калининград → Europe/Kaliningrad
+- London → Europe/London
+- New York → America/New_York
+- Tokyo → Asia/Tokyo
+- Sydney → Australia/Sydney
+
+Rules:
+- Return ONLY the timezone identifier (e.g., "Europe/Moscow")
+- If city is ambiguous or unknown, return "Europe/Moscow" as safe default
+- No explanations, just the timezone string
+
+Respond with ONLY the timezone identifier."""
+                    },
+                    {
+                        "role": "user",
+                        "content": city_name
+                    }
+                ],
+                temperature=0
+            )
+            
+            timezone = response.choices[0].message.content.strip()
+            logger.info(f"Detected timezone for '{city_name}': {timezone}")
+            
+            # Validate timezone format (should be Continent/City)
+            if '/' in timezone and len(timezone.split('/')) == 2:
+                return timezone
+            else:
+                logger.warning(f"Invalid timezone format returned: {timezone}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Timezone detection failed for '{city_name}': {e}")
+            return None
+    
+    @staticmethod
     async def transcribe_audio(audio_file_path: str) -> Optional[str]:
         """
         Transcribe audio file using Whisper API
@@ -136,31 +218,60 @@ class AIService:
     @staticmethod
     async def classify_message(text: str) -> str:
         """
-        Classify if message is about Session, Client Edit, or Query
+        Classify if message is about Session, Client Edit, Booking, or Query
         
         Returns:
-            "log_session", "client_update", "consultation", or "add_service"
+            "log_session", "client_update", "consultation", "booking", "client_query", or "add_service"
         """
         try:
+            # Get current date context for classification
+            tz = pytz.timezone(Config.TIMEZONE)
+            current_datetime = datetime.now(tz)
+            current_date = current_datetime.strftime('%Y-%m-%d')
+            current_weekday = current_datetime.strftime('%A')
+            
             response = await client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "system",
-                        "content": """You are an expert assistant for massage therapists. Classify the therapist's message intent:
+                        "content": f"""You are an expert assistant for massage therapists. Classify the therapist's message intent.
 
-- LOG_SESSION: Recording a completed session (contains client, service, price, complaints)
+Today is {current_date} ({current_weekday}).
+
+Classify into ONE of these categories:
+
+- LOG_SESSION: Recording a COMPLETED session (past tense, mentions price/payment)
+  Examples: "Приходила Анна, заплатила 3000", "Сделал массаж Ивану за 2500"
+  Indicators: past tense verbs, completed action, payment mentioned
+
+- BOOKING: Scheduling a FUTURE appointment (future tense, imperative, time references)
+  Examples: "Запиши Ольгу на завтра в 14:00", "Book Mike for Tuesday 10 AM"
+  Indicators: imperative mood, future time references ("завтра", "во вторник", "next week")
+
+- CLIENT_QUERY: Asking for information about a client
+  Examples: "Кто такая Анна?", "Что у Ивана с спиной?", "Напомни про Ольгу"
+  Indicators: questions ("кто", "что", "когда"), information requests
+
 - CLIENT_UPDATE: Adding notes about client WITHOUT session/payment details
-- CONSULTATION: Asking about client history or looking up information
-- ADD_SERVICE: Defining a new service type in their catalog
+  Examples: "У Ольги аллергия на мёд", "Иван просил пожестче"
+  Indicators: declarative statements about client attributes, no session/payment context
 
-Key indicators:
-- LOG_SESSION: mentions price, completed session, "сделали", "приходила", service type
-- CLIENT_UPDATE: ONLY preferences, interests, characteristics WITHOUT purchase details
-- CONSULTATION: questions about clients, "кто", "когда", "сколько"
-- ADD_SERVICE: defining new service, "добавь услугу"
+- CONSULTATION: General consultation request
+  Examples: "Посоветуй что делать", "Как лучше?"
+  Indicators: asking for advice, not about specific client
 
-Respond with only one word: "log_session", "client_update", "consultation", or "add_service"."""
+- ADD_SERVICE: Defining a new service type
+  Examples: "Добавь услугу: Антицеллюлитный массаж"
+  Indicators: explicitly adding service to catalog
+
+Key distinctions:
+- Past tense + payment = LOG_SESSION
+- Future time + scheduling = BOOKING
+- Question about client = CLIENT_QUERY
+- Statement about client preferences/attributes = CLIENT_UPDATE
+
+Respond with only one word: "log_session", "booking", "client_query", "client_update", "consultation", or "add_service"."""
                     },
                     {
                         "role": "user",
@@ -172,7 +283,9 @@ Respond with only one word: "log_session", "client_update", "consultation", or "
             
             classification = response.choices[0].message.content.strip().lower()
             logger.info(f"Message classified as: {classification}")
-            return classification if classification in ["log_session", "client_update", "consultation", "add_service"] else "log_session"
+            
+            valid_intents = ["log_session", "client_update", "consultation", "add_service", "booking", "client_query"]
+            return classification if classification in valid_intents else "log_session"
             
         except Exception as e:
             logger.error(f"Classification failed: {e}")
@@ -444,12 +557,18 @@ Return data in the specified JSON format."""
 
 Extract:
 1. Client name (the person being discussed)
-2. Notes/information to add about the client (preferences, interests, characteristics, etc.)
+2. Target field to update:
+   - "anamnesis" for medical information (allergies, conditions, pain, medical history)
+   - "notes" for preferences, likes/dislikes, non-medical information
+   - "contacts" for phone numbers or contact information
+3. Content to append
 
-IMPORTANT:
-- The client name should be the person's full name
-- Notes should be descriptive information about the client
-- Return data in the specified JSON format."""
+Examples:
+- "У Ольги аллергия на мёд" → target_field: "anamnesis", content: "Аллергия на мёд"
+- "Иван просил пожестче" → target_field: "notes", content: "Просил пожестче"
+- "Телефон Анны +7 999 123 45 67" → target_field: "contacts", content: "+7 999 123 45 67"
+
+Return data in the specified JSON format."""
                     },
                     {
                         "role": "user",
@@ -463,9 +582,10 @@ IMPORTANT:
                         "type": "object",
                         "properties": {
                             "client_name": {"type": "string"},
-                            "notes": {"type": "string"}
+                            "target_field": {"type": "string", "enum": ["anamnesis", "notes", "contacts"]},
+                            "content_to_append": {"type": "string"}
                         },
-                        "required": ["client_name", "notes"],
+                        "required": ["client_name", "target_field", "content_to_append"],
                         "additionalProperties": False
                     }
                 }},
@@ -476,7 +596,7 @@ IMPORTANT:
             result = json.loads(response.choices[0].message.content)
             client_edit_data = ClientEditData(**result)
             
-            logger.info(f"Parsed client edit: {client_edit_data.client_name}")
+            logger.info(f"Parsed client edit: {client_edit_data.client_name} - {client_edit_data.target_field}")
             return client_edit_data
             
         except Exception as e:
@@ -484,19 +604,180 @@ IMPORTANT:
             return None
     
     @staticmethod
-    async def parse_session(text: str, current_date: str, service_names: List[str] = None) -> Optional[SessionData]:
+    async def parse_booking(text: str, current_date: str, user_current_date: Optional[str] = None) -> Optional[BookingData]:
+        """
+        Parse booking/appointment information from transcribed text
+        
+        Args:
+            text: Transcribed text
+            current_date: Server current date in YYYY-MM-DD format (for backward compatibility)
+            user_current_date: User's local current date in YYYY-MM-DD format (preferred)
+            
+        Returns:
+            BookingData object or None if parsing failed
+        """
+        try:
+            # Use user's local date if provided, otherwise fall back to server date
+            reference_date = user_current_date or current_date
+            
+            # Calculate reference dates for the AI
+            tz = pytz.timezone(Config.TIMEZONE)
+            today = datetime.strptime(reference_date, '%Y-%m-%d')
+            weekday = today.strftime('%A')
+            
+            response = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"""You are a scheduling assistant extracting appointment booking information.
+
+Today is {reference_date} ({weekday}).
+
+Extract:
+1. client_name: Full client name
+2. date: Appointment date in YYYY-MM-DD format
+   - "tomorrow" → {(today + timedelta(days=1)).strftime('%Y-%m-%d')}
+   - "today" → {reference_date}
+   - "next Monday", "next Tuesday", etc. → calculate next occurrence of that weekday
+   - "завтра" → {(today + timedelta(days=1)).strftime('%Y-%m-%d')}
+   - "в понедельник", "во вторник" → next occurrence of that day
+3. time: Appointment time in HH:MM format (24-hour)
+   - "10 AM" → "10:00"
+   - "3 PM" → "15:00"
+   - "14:00" → "14:00"
+4. service_name: Type of massage/service (optional)
+5. duration: Duration in minutes (optional)
+6. notes: Special instructions (optional)
+
+Examples:
+- "Запиши Ольгу на завтра в 14:00" → date: tomorrow's date, time: "14:00"
+- "Book Mike for Tuesday 10 AM" → date: next Tuesday, time: "10:00"
+- "Добавь Анну в пятницу в 15:30, массаж лица" → date: next Friday, time: "15:30", service: "Массаж лица"
+
+Return data in the specified JSON format."""
+                    },
+                    {
+                        "role": "user",
+                        "content": text
+                    }
+                ],
+                response_format={"type": "json_schema", "json_schema": {
+                    "name": "booking_data",
+                    "strict": True,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "client_name": {"type": "string"},
+                            "date": {"type": "string"},
+                            "time": {"type": "string"},
+                            "service_name": {"type": ["string", "null"]},
+                            "duration": {"type": ["integer", "null"]},
+                            "notes": {"type": ["string", "null"]}
+                        },
+                        "required": ["client_name", "date", "time", "service_name", "duration", "notes"],
+                        "additionalProperties": False
+                    }
+                }},
+                temperature=0
+            )
+            
+            import json
+            result = json.loads(response.choices[0].message.content)
+            booking_data = BookingData(**result)
+            
+            logger.info(f"Parsed booking: {booking_data.client_name} on {booking_data.date} at {booking_data.time}")
+            return booking_data
+            
+        except Exception as e:
+            logger.error(f"Booking parsing failed: {e}")
+            return None
+    
+    @staticmethod
+    async def parse_client_query(text: str) -> Optional[ClientQueryData]:
+        """
+        Parse client query information from transcribed text
+        
+        Args:
+            text: Transcribed text
+            
+        Returns:
+            ClientQueryData object or None if parsing failed
+        """
+        try:
+            response = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are a CRM assistant extracting client query information.
+
+Extract:
+1. client_name: Name of the client being asked about
+2. query_topic: Category of the query
+   - "general" - general information request
+   - "medical" - asking about medical history, complaints, anamnesis
+   - "financial" - asking about payments, LTV, pricing
+   - "history" - asking about session history, last visit
+
+Examples:
+- "Кто такая Анна?" → client_name: "Анна", query_topic: "general"
+- "Что у Ивана с спиной?" → client_name: "Иван", query_topic: "medical"
+- "Когда Ольга последний раз приходила?" → client_name: "Ольга", query_topic: "history"
+- "What's Maria's LTV?" → client_name: "Maria", query_topic: "financial"
+
+Return data in the specified JSON format."""
+                    },
+                    {
+                        "role": "user",
+                        "content": text
+                    }
+                ],
+                response_format={"type": "json_schema", "json_schema": {
+                    "name": "client_query_data",
+                    "strict": True,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "client_name": {"type": "string"},
+                            "query_topic": {"type": "string", "enum": ["general", "medical", "financial", "history"]}
+                        },
+                        "required": ["client_name", "query_topic"],
+                        "additionalProperties": False
+                    }
+                }},
+                temperature=0
+            )
+            
+            import json
+            result = json.loads(response.choices[0].message.content)
+            client_query_data = ClientQueryData(**result)
+            
+            logger.info(f"Parsed client query: {client_query_data.client_name} - {client_query_data.query_topic}")
+            return client_query_data
+            
+        except Exception as e:
+            logger.error(f"Client query parsing failed: {e}")
+            return None
+    
+    @staticmethod
+    async def parse_session(text: str, current_date: str, service_names: List[str] = None, user_current_date: Optional[str] = None) -> Optional[SessionData]:
         """
         Parse massage session information from transcribed text
         
         Args:
             text: Transcribed text
-            current_date: Current date in YYYY-MM-DD format
+            current_date: Server current date in YYYY-MM-DD format (for backward compatibility)
             service_names: List of known service names for matching (optional)
+            user_current_date: User's local current date in YYYY-MM-DD format (preferred)
             
         Returns:
             SessionData object or None if parsing failed
         """
         try:
+            # Use user's local date if provided, otherwise fall back to server date
+            reference_date = user_current_date or current_date
+            
             # Create service context if available
             services_context = ""
             if service_names:
@@ -509,7 +790,7 @@ IMPORTANT:
                         "role": "system",
                         "content": f"""Extract data from a massage therapist's voice note about a completed session.
 
-Today's date is: {current_date}{services_context}
+Today's date is: {reference_date}{services_context}
 
 CRITICAL DISTINCTION:
 - medical_notes: Medical complaints, pain, health conditions, contraindications

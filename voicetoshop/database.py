@@ -40,6 +40,7 @@ class DatabaseService:
                 CREATE TABLE IF NOT EXISTS users (
                     tg_id INTEGER PRIMARY KEY,
                     sheet_id TEXT NOT NULL UNIQUE,
+                    timezone TEXT DEFAULT 'Europe/Moscow',
                     is_active BOOLEAN DEFAULT TRUE,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     last_active_at TIMESTAMP
@@ -51,6 +52,16 @@ class DatabaseService:
                 CREATE INDEX IF NOT EXISTS idx_active_users 
                 ON users(is_active, last_active_at)
             """)
+            
+            # Add timezone column to existing tables (migration)
+            try:
+                await db.execute("""
+                    ALTER TABLE users ADD COLUMN timezone TEXT DEFAULT 'Europe/Moscow'
+                """)
+                logger.info("Added timezone column to users table")
+            except Exception:
+                # Column already exists, ignore
+                pass
             
             await db.commit()
             logger.info("Database schema initialized")
@@ -170,6 +181,70 @@ class DatabaseService:
         except Exception as e:
             logger.error(f"Failed to get total users: {e}")
             return 0
+    
+    async def get_all_active_users(self) -> list:
+        """Get all active users with their sheet_id and timezone"""
+        try:
+            async with aiosqlite.connect(self.db_path) as db:
+                async with db.execute(
+                    "SELECT tg_id, sheet_id, timezone FROM users WHERE is_active = TRUE"
+                ) as cursor:
+                    rows = await cursor.fetchall()
+                    return [
+                        {'tg_id': row[0], 'sheet_id': row[1], 'timezone': row[2] or 'Europe/Moscow'}
+                        for row in rows
+                    ]
+        except Exception as e:
+            logger.error(f"Failed to get all active users: {e}")
+            return []
+    
+    async def get_user_timezone(self, tg_id: int) -> Optional[str]:
+        """
+        Retrieve user's timezone
+        
+        Args:
+            tg_id: Telegram user ID
+            
+        Returns:
+            Timezone string or 'Europe/Moscow' as fallback
+        """
+        try:
+            async with aiosqlite.connect(self.db_path) as db:
+                async with db.execute(
+                    "SELECT timezone FROM users WHERE tg_id = ? AND is_active = TRUE",
+                    (tg_id,)
+                ) as cursor:
+                    row = await cursor.fetchone()
+                    if row and row[0]:
+                        return row[0]
+                    return 'Europe/Moscow'  # Default fallback
+        except Exception as e:
+            logger.error(f"Failed to get timezone for user {tg_id}: {e}")
+            return 'Europe/Moscow'
+    
+    async def update_user_timezone(self, tg_id: int, timezone: str) -> bool:
+        """
+        Update user's timezone
+        
+        Args:
+            tg_id: Telegram user ID
+            timezone: IANA timezone identifier
+            
+        Returns:
+            True if successful, False on error
+        """
+        try:
+            async with aiosqlite.connect(self.db_path) as db:
+                await db.execute(
+                    "UPDATE users SET timezone = ? WHERE tg_id = ?",
+                    (timezone, tg_id)
+                )
+                await db.commit()
+                logger.info(f"Updated timezone for user {tg_id} to {timezone}")
+                return True
+        except Exception as e:
+            logger.error(f"Failed to update timezone for user {tg_id}: {e}")
+            return False
 
 
 # Global instance

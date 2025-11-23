@@ -17,6 +17,7 @@ class SheetsService:
     CLIENTS_SHEET = "Clients"
     SESSIONS_SHEET = "Sessions"
     SERVICES_SHEET = "Services"
+    SCHEDULE_SHEET = "Schedule"
     
     def __init__(self):
         self.agcm = None
@@ -148,7 +149,8 @@ class SheetsService:
             headers = {
                 self.CLIENTS_SHEET: ["Name", "Phone_Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"],
                 self.SESSIONS_SHEET: ["Date", "Client_Name", "Service_Type", "Duration", "Price", "Session_Notes"],
-                self.SERVICES_SHEET: ["Service_Name", "Default_Price", "Default_Duration"]
+                self.SERVICES_SHEET: ["Service_Name", "Default_Price", "Default_Duration"],
+                self.SCHEDULE_SHEET: ["Date", "Time", "Client_Name", "Service_Type", "Duration", "Status", "Notes"]
             }
             
             for sheet_name, header_row in headers.items():
@@ -325,14 +327,18 @@ class SheetsService:
     
     async def get_client(self, sheet_id: str, client_name: str) -> Optional[Dict[str, Any]]:
         """
-        Get client information with session history
+        Get client information with session history and ambiguity detection
         
         Args:
             sheet_id: User's Google Sheet ID
-            client_name: Client name to lookup
+            client_name: Client name to lookup (supports partial matching)
             
         Returns:
-            Dict with client data and session history, or None if not found
+            Dict with client data, session history, and ambiguity flags:
+            - All standard client fields (name, phone_contact, anamnesis, etc.)
+            - _is_ambiguous: Boolean flag indicating multiple matches
+            - _alternatives: List of alternative client names if ambiguous
+            Returns None if not found
         """
         try:
             spreadsheet = await self._get_spreadsheet(sheet_id)
@@ -345,46 +351,106 @@ class SheetsService:
                 return None
             
             headers = all_values[0]
+            search_name_lower = client_name.strip().lower()
             
-            # Find client
+            # Phase 1: Find all matching clients
+            matches = []
             for row_data in all_values[1:]:
                 while len(row_data) < len(headers):
                     row_data.append('')
                 
                 record = dict(zip(headers, row_data))
-                if record.get('Name', '').strip().lower() == client_name.strip().lower():
-                    # Get session history
-                    sessions_ws = await spreadsheet.worksheet(self.SESSIONS_SHEET)
-                    sessions_data = await sessions_ws.get_all_values()
-                    
-                    session_history = []
-                    if len(sessions_data) > 1:
-                        session_headers = sessions_data[0]
-                        for session_row in sessions_data[1:]:
-                            while len(session_row) < len(session_headers):
-                                session_row.append('')
-                            session_record = dict(zip(session_headers, session_row))
-                            
-                            if session_record.get('Client_Name', '').strip().lower() == client_name.strip().lower():
-                                session_history.append({
-                                    'date': session_record.get('Date', ''),
-                                    'service': session_record.get('Service_Type', ''),
-                                    'price': session_record.get('Price', ''),
-                                    'notes': session_record.get('Session_Notes', '')
-                                })
-                    
-                    return {
-                        'name': record.get('Name', ''),
-                        'phone_contact': record.get('Phone_Contact', ''),
-                        'anamnesis': record.get('Anamnesis', ''),
-                        'notes': record.get('Notes', ''),
-                        'ltv': record.get('LTV', ''),
-                        'last_visit_date': record.get('Last_Visit_Date', ''),
-                        'next_reminder': record.get('Next_Reminder', ''),
-                        'session_history': session_history
-                    }
+                client_full_name = record.get('Name', '').strip()
+                
+                # Case-insensitive substring matching
+                if search_name_lower in client_full_name.lower():
+                    matches.append((client_full_name, record))
             
-            return None
+            # Phase 2: Handle match results
+            if len(matches) == 0:
+                return None
+            
+            is_ambiguous = False
+            alternatives = []
+            selected_record = None
+            
+            if len(matches) == 1:
+                # Single match - no ambiguity
+                selected_record = matches[0][1]
+            else:
+                # Multiple matches - apply selection strategy
+                is_ambiguous = True
+                
+                # Priority 1: Exact match (case-insensitive)
+                exact_match = None
+                for name, record in matches:
+                    if name.lower() == search_name_lower:
+                        exact_match = (name, record)
+                        is_ambiguous = False  # Exact match is not ambiguous
+                        break
+                
+                if exact_match:
+                    selected_record = exact_match[1]
+                    # All other matches are alternatives
+                    alternatives = [name for name, _ in matches if name != exact_match[0]]
+                else:
+                    # Priority 2: Most recent visit date
+                    # Sort by Last_Visit_Date (most recent first)
+                    from datetime import datetime
+                    
+                    def parse_date_safe(date_str):
+                        """Parse date string safely, return None if invalid"""
+                        try:
+                            if date_str and date_str.strip():
+                                return datetime.strptime(date_str.strip(), '%Y-%m-%d')
+                        except:
+                            pass
+                        return None
+                    
+                    # Sort matches by date (None dates go to end)
+                    sorted_matches = sorted(
+                        matches,
+                        key=lambda x: parse_date_safe(x[1].get('Last_Visit_Date', '')) or datetime.min,
+                        reverse=True
+                    )
+                    
+                    selected_record = sorted_matches[0][1]
+                    alternatives = [name for name, _ in sorted_matches[1:]]
+            
+            # Phase 3: Get session history for selected client
+            selected_name = selected_record.get('Name', '')
+            sessions_ws = await spreadsheet.worksheet(self.SESSIONS_SHEET)
+            sessions_data = await sessions_ws.get_all_values()
+            
+            session_history = []
+            if len(sessions_data) > 1:
+                session_headers = sessions_data[0]
+                for session_row in sessions_data[1:]:
+                    while len(session_row) < len(session_headers):
+                        session_row.append('')
+                    session_record = dict(zip(session_headers, session_row))
+                    
+                    if session_record.get('Client_Name', '').strip().lower() == selected_name.strip().lower():
+                        session_history.append({
+                            'date': session_record.get('Date', ''),
+                            'service': session_record.get('Service_Type', ''),
+                            'price': session_record.get('Price', ''),
+                            'notes': session_record.get('Session_Notes', '')
+                        })
+            
+            # Phase 4: Return result with ambiguity metadata
+            return {
+                'name': selected_record.get('Name', ''),
+                'phone_contact': selected_record.get('Phone_Contact', ''),
+                'anamnesis': selected_record.get('Anamnesis', ''),
+                'notes': selected_record.get('Notes', ''),
+                'ltv': selected_record.get('LTV', ''),
+                'last_visit_date': selected_record.get('Last_Visit_Date', ''),
+                'next_reminder': selected_record.get('Next_Reminder', ''),
+                'session_history': session_history,
+                '_is_ambiguous': is_ambiguous,
+                '_alternatives': alternatives
+            }
             
         except Exception as e:
             logger.error(f"Failed to get client {client_name}: {e}")
@@ -415,6 +481,211 @@ class SheetsService:
             
         except Exception as e:
             logger.error(f"Failed to get services: {e}")
+            return []
+    
+    async def add_booking(self, sheet_id: str, booking_data: Dict[str, Any]) -> None:
+        """
+        Add a future appointment to the Schedule worksheet
+        
+        Args:
+            sheet_id: User's Google Sheet ID
+            booking_data: Dict with keys:
+                - client_name (str)
+                - date (str, YYYY-MM-DD)
+                - time (str, HH:MM)
+                - service_name (str, optional)
+                - duration (int, optional)
+                - notes (str, optional)
+        """
+        try:
+            spreadsheet = await self._get_spreadsheet(sheet_id)
+            
+            # Ensure worksheets exist (including Schedule)
+            await self._ensure_worksheets(sheet_id)
+            
+            # Get Schedule worksheet
+            schedule_ws = await spreadsheet.worksheet(self.SCHEDULE_SHEET)
+            
+            # Prepare row data
+            booking_row = [
+                booking_data['date'],
+                booking_data['time'],
+                booking_data['client_name'],
+                booking_data.get('service_name') or 'Не указано',
+                booking_data.get('duration', ''),
+                'Confirmed',
+                booking_data.get('notes', '')
+            ]
+            
+            # Append to Schedule sheet
+            await schedule_ws.append_row(booking_row)
+            logger.info(f"Added booking for {booking_data['client_name']} on {booking_data['date']} at {booking_data['time']}")
+            
+        except PermissionError:
+            logger.error(f"Permission denied for sheet {sheet_id}")
+            raise
+        except Exception as e:
+            logger.error(f"Failed to add booking: {e}")
+            raise
+    
+    async def update_client_info(self, sheet_id: str, edit_data: Dict[str, Any]) -> bool:
+        """
+        Update client information by appending to existing data
+        
+        Args:
+            sheet_id: User's Google Sheet ID
+            edit_data: Dict with keys:
+                - client_name (str)
+                - target_field (str): 'anamnesis', 'notes', or 'contacts'
+                - content_to_append (str)
+                
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            spreadsheet = await self._get_spreadsheet(sheet_id)
+            
+            # Ensure worksheets exist
+            await self._ensure_worksheets(sheet_id)
+            
+            clients_ws = await spreadsheet.worksheet(self.CLIENTS_SHEET)
+            all_values = await clients_ws.get_all_values()
+            
+            if not all_values or len(all_values) < 1:
+                # No data, create header and new client
+                headers = ["Name", "Phone_Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"]
+                await clients_ws.update('A1', [headers])
+                all_values = [headers]
+            
+            headers = all_values[0]
+            client_name = edit_data['client_name']
+            target_field = edit_data['target_field']
+            content = edit_data['content_to_append']
+            
+            # Map target_field to column name
+            field_mapping = {
+                'anamnesis': 'Anamnesis',
+                'notes': 'Notes',
+                'contacts': 'Phone_Contact'
+            }
+            
+            if target_field not in field_mapping:
+                raise ValueError(f"Invalid target_field: {target_field}")
+            
+            column_name = field_mapping[target_field]
+            
+            # Find existing client
+            existing_row_index = None
+            existing_data = None
+            
+            for idx, row_data in enumerate(all_values[1:], start=2):
+                # Pad row if needed
+                while len(row_data) < len(headers):
+                    row_data.append('')
+                
+                record = dict(zip(headers, row_data))
+                if record.get('Name', '').strip().lower() == client_name.strip().lower():
+                    existing_row_index = idx
+                    existing_data = record
+                    break
+            
+            # Get current date for timestamp
+            current_date_short = datetime.now().strftime('%d.%m')
+            
+            if existing_row_index:
+                # Update existing client
+                current_value = existing_data.get(column_name, '').strip()
+                
+                # Append with timestamp
+                if current_value:
+                    updated_value = f"{current_value}\n({current_date_short}): {content}"
+                else:
+                    updated_value = f"({current_date_short}): {content}"
+                
+                # Find column index
+                col_index = headers.index(column_name)
+                col_letter = chr(65 + col_index)  # A=65 in ASCII
+                
+                # Update the specific cell
+                await clients_ws.update(f'{col_letter}{existing_row_index}', [[updated_value]])
+                logger.info(f"Updated {column_name} for existing client: {client_name}")
+                
+            else:
+                # Create new client with the information
+                new_row = [''] * len(headers)
+                new_row[headers.index('Name')] = client_name
+                
+                # Set the target field
+                new_row[headers.index(column_name)] = f"({current_date_short}): {content}"
+                
+                await clients_ws.append_row(new_row)
+                logger.info(f"Created new client: {client_name} with {column_name}")
+            
+            return True
+            
+        except PermissionError:
+            logger.error(f"Permission denied for sheet {sheet_id}")
+            raise
+        except Exception as e:
+            logger.error(f"Failed to update client info: {e}")
+            return False
+    
+    async def get_daily_schedule(self, sheet_id: str, target_date: str) -> List[Dict[str, Any]]:
+        """
+        Get appointments for a specific date from Schedule worksheet
+        
+        Args:
+            sheet_id: User's Google Sheet ID
+            target_date: Date in YYYY-MM-DD format
+            
+        Returns:
+            List of appointment dictionaries sorted by time
+        """
+        try:
+            spreadsheet = await self._get_spreadsheet(sheet_id)
+            
+            # Try to get Schedule worksheet
+            try:
+                schedule_ws = await spreadsheet.worksheet(self.SCHEDULE_SHEET)
+            except Exception:
+                # Schedule sheet doesn't exist yet
+                logger.info(f"Schedule sheet not found for {sheet_id}, returning empty list")
+                return []
+            
+            # Get all records
+            all_values = await schedule_ws.get_all_values()
+            
+            if not all_values or len(all_values) < 2:
+                return []
+            
+            headers = all_values[0]
+            appointments = []
+            
+            for row_data in all_values[1:]:
+                # Pad row if needed
+                while len(row_data) < len(headers):
+                    row_data.append('')
+                
+                record = dict(zip(headers, row_data))
+                
+                # Filter by date and status
+                if record.get('Date') == target_date and record.get('Status', '').lower() != 'cancelled':
+                    appointments.append({
+                        'time': record.get('Time', ''),
+                        'client_name': record.get('Client_Name', ''),
+                        'service_type': record.get('Service_Type', ''),
+                        'duration': record.get('Duration', ''),
+                        'notes': record.get('Notes', '')
+                    })
+            
+            # Sort by time
+            appointments.sort(key=lambda x: x['time'])
+            
+            logger.info(f"Retrieved {len(appointments)} appointments for {target_date}")
+            return appointments
+            
+        except Exception as e:
+            logger.error(f"Failed to get daily schedule: {e}")
             return []
 
 

@@ -8,6 +8,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.enums import ParseMode
 import pytz
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config import Config
 from database import db_service
@@ -25,8 +26,12 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=Config.BOT_TOKEN)
 dp = Dispatcher()
 
+# Initialize scheduler
+scheduler = AsyncIOScheduler(timezone=pytz.timezone(Config.TIMEZONE))
+
 # Onboarding state tracking (in-memory)
-onboarding_states = {}  # {tg_id: "AWAITING_SHEET_URL"}
+onboarding_states = {}  # {tg_id: "AWAITING_SHEET_URL" or "AWAITING_CITY"}
+onboarding_sheet_ids = {}  # {tg_id: sheet_id} - temporary storage during onboarding
 
 
 async def get_user_context(tg_id: int) -> dict:
@@ -157,6 +162,14 @@ async def cmd_client(message: Message):
             for session in session_history[-5:]:  # Last 5 sessions
                 response += f"  • {session['date']}: {session['service']} ({session['price']}₽)\n"
         
+        # Add ambiguity warning if applicable
+        if client_info.get('_is_ambiguous', False):
+            alternatives = client_info.get('_alternatives', [])
+            if alternatives:
+                response += f"\n⚠️ <b>Найдено несколько совпадений:</b> {', '.join(alternatives)}\n"
+                response += f"Использована: {client_info['name']}\n"
+                response += f"Если это не та клиентка, уточните запрос."
+        
         await message.answer(response, parse_mode=ParseMode.HTML)
         
     except Exception as e:
@@ -180,14 +193,91 @@ async def cmd_stats(message: Message):
         await message.answer("❌ Ошибка получения статистики")
 
 
+@dp.message(Command("set_timezone"))
+async def cmd_set_timezone(message: Message):
+    """Handle /set_timezone command - update user timezone"""
+    tg_id = message.from_user.id
+    logger.info(f"User <TG_ID:{tg_id}> called /set_timezone command")
+    
+    # Check if user is registered
+    context = await get_user_context(tg_id)
+    if not context:
+        await message.answer(
+            "❌ Вы не зарегистрированы.\n\n"
+            "Отправьте /start для регистрации."
+        )
+        return
+    
+    # Extract city name from command
+    text = message.text or ""
+    parts = text.split(maxsplit=1)
+    
+    if len(parts) < 2:
+        await message.answer(
+            "❌ Укажите название города\n\n"
+            "<b>Использование:</b> /set_timezone Москва\n\n"
+            "<b>Примеры:</b>\n"
+            "  /set_timezone Санкт-Петербург\n"
+            "  /set_timezone Новосибирск\n"
+            "  /set_timezone Владивосток",
+            parse_mode=ParseMode.HTML
+        )
+        return
+    
+    city = parts[1].strip()
+    logger.info(f"Updating timezone for city: '{city}'")
+    
+    # Show processing message
+    processing_msg = await message.answer("🌍 Определяю часовой пояс...")
+    
+    try:
+        # Detect timezone using AI
+        timezone = await ai_service.detect_timezone(city)
+        
+        if not timezone:
+            await processing_msg.edit_text(
+                f"❌ Не удалось определить часовой пояс для города '{city}'.\n\n"
+                "Попробуйте указать более крупный город в вашем регионе."
+            )
+            return
+        
+        # Update timezone in database
+        success = await db_service.update_user_timezone(tg_id, timezone)
+        
+        if success:
+            await processing_msg.edit_text(
+                f"✅ <b>Часовой пояс обновлён</b>\n\n"
+                f"🌍 Город: {city}\n"
+                f"⏰ Часовой пояс: {timezone}\n\n"
+                f"Утренние уведомления будут приходить в 09:00 по вашему местному времени.",
+                parse_mode=ParseMode.HTML
+            )
+            logger.info(f"User <TG_ID:{tg_id}> updated timezone to {timezone}")
+        else:
+            await processing_msg.edit_text(
+                "❌ Ошибка обновления часового пояса. Попробуйте позже."
+            )
+        
+    except Exception as e:
+        logger.error(f"Error updating timezone: {e}")
+        await processing_msg.edit_text(
+            f"❌ Ошибка обновления: {str(e)}"
+        )
+
+
 @dp.message(F.text)
 async def handle_text(message: Message):
-    """Handle text messages - onboarding URL or client lookup"""
+    """Handle text messages - onboarding URL, city input, or client lookup"""
     tg_id = message.from_user.id
     
-    # Check if user is in onboarding
+    # Check if user is in onboarding - sheet URL stage
     if onboarding_states.get(tg_id) == "AWAITING_SHEET_URL":
         await process_sheet_url(message)
+        return
+    
+    # Check if user is in onboarding - city input stage
+    if onboarding_states.get(tg_id) == "AWAITING_CITY":
+        await process_city_input(message)
         return
     
     # Check if user is registered
@@ -219,25 +309,18 @@ async def process_sheet_url(message: Message):
         success, msg, sheet_id = await sheets_service.validate_and_connect(url)
         
         if success:
-            # Register user in database
-            result = await db_service.add_user(tg_id, sheet_id)
+            # Store sheet_id temporarily and transition to city collection
+            onboarding_sheet_ids[tg_id] = sheet_id
+            onboarding_states[tg_id] = "AWAITING_CITY"
             
-            if result:
-                # Clear onboarding state
-                onboarding_states.pop(tg_id, None)
-                
-                await processing_msg.edit_text(
-                    f"✅ <b>Готово!</b>\n\n"
-                    f"Ваша таблица подключена.\n"
-                    f"Теперь можете отправлять голосовые сообщения о сеансах массажа.",
-                    parse_mode=ParseMode.HTML
-                )
-                
-                logger.info(f"User onboarded: TG_ID {tg_id}, Sheet {sheet_id}")
-            else:
-                await processing_msg.edit_text(
-                    "❌ Ошибка сохранения данных. Попробуйте позже."
-                )
+            await processing_msg.edit_text(
+                f"✅ Таблица проверена!\n\n"
+                f"В каком городе вы работаете? (Нужно для настройки времени уведомлений)\n\n"
+                f"Примеры: Москва, Санкт-Петербург, Новосибирск",
+                parse_mode=ParseMode.HTML
+            )
+            
+            logger.info(f"Sheet validated for TG_ID {tg_id}, awaiting city input")
         else:
             await processing_msg.edit_text(msg, parse_mode=ParseMode.HTML)
             
@@ -246,6 +329,63 @@ async def process_sheet_url(message: Message):
         await processing_msg.edit_text(
             "❌ Произошла ошибка при проверке таблицы.\n\n"
             "Попробуйте еще раз или обратитесь в поддержку."
+        )
+
+
+async def process_city_input(message: Message):
+    """Process city name during onboarding and complete registration"""
+    tg_id = message.from_user.id
+    city = message.text.strip()
+    
+    # Retrieve temporarily stored sheet_id
+    sheet_id = onboarding_sheet_ids.get(tg_id)
+    if not sheet_id:
+        await message.answer(
+            "❌ Произошла ошибка. Пожалуйста, начните заново с /start"
+        )
+        return
+    
+    # Show processing message
+    processing_msg = await message.answer("🌍 Определяю часовой пояс...")
+    
+    try:
+        # Detect timezone using AI
+        timezone = await ai_service.detect_timezone(city)
+        
+        if not timezone:
+            # Fallback to default timezone
+            timezone = 'Europe/Moscow'
+            logger.warning(f"Failed to detect timezone for city '{city}', using default: {timezone}")
+        
+        # Register user in database
+        result = await db_service.add_user(tg_id, sheet_id)
+        
+        if result:
+            # Update timezone
+            await db_service.update_user_timezone(tg_id, timezone)
+            
+            # Clear onboarding state
+            onboarding_states.pop(tg_id, None)
+            onboarding_sheet_ids.pop(tg_id, None)
+            
+            await processing_msg.edit_text(
+                f"✅ <b>Готово!</b>\n\n"
+                f"Ваша таблица подключена.\n"
+                f"Часовой пояс: {timezone}\n\n"
+                f"Теперь можете отправлять голосовые сообщения о сеансах массажа.",
+                parse_mode=ParseMode.HTML
+            )
+            
+            logger.info(f"User onboarded: TG_ID {tg_id}, Sheet {sheet_id}, Timezone {timezone}")
+        else:
+            await processing_msg.edit_text(
+                "❌ Ошибка сохранения данных. Попробуйте позже."
+            )
+            
+    except Exception as e:
+        logger.error(f"Error processing city input: {e}")
+        await processing_msg.edit_text(
+            "❌ Произошла ошибка. Попробуйте позже или обратитесь в поддержку."
         )
 
 
@@ -295,6 +435,10 @@ async def handle_voice(message: Message):
             await handle_session(message, processing_msg, transcription, sheet_id, tg_id)
         elif message_type == "client_update":
             await handle_client_update(message, processing_msg, transcription, sheet_id, tg_id)
+        elif message_type == "booking":
+            await handle_booking(message, processing_msg, transcription, sheet_id, tg_id)
+        elif message_type == "client_query":
+            await handle_client_query(message, processing_msg, transcription, sheet_id, tg_id)
         elif message_type == "consultation":
             await processing_msg.edit_text(
                 "Для просмотра информации о клиенте используйте команду:\n"
@@ -312,15 +456,22 @@ async def handle_voice(message: Message):
 async def handle_session(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
     """Handle session logging flow"""
     try:
-        # Get current date
-        tz = pytz.timezone(Config.TIMEZONE)
-        current_date = datetime.now(tz).strftime('%Y-%m-%d')
+        # Get user's timezone and calculate local date
+        user_timezone_str = await db_service.get_user_timezone(tg_id)
+        try:
+            user_tz = pytz.timezone(user_timezone_str)
+            user_now = datetime.now(user_tz)
+            user_current_date = user_now.strftime('%Y-%m-%d')
+        except Exception as tz_error:
+            logger.warning(f"Failed to parse timezone '{user_timezone_str}': {tz_error}, using server time")
+            tz = pytz.timezone(Config.TIMEZONE)
+            user_current_date = datetime.now(tz).strftime('%Y-%m-%d')
         
         # Get service names for context (optional)
         service_names = await sheets_service.get_services(sheet_id)
         
-        # Parse session data
-        session_data = await ai_service.parse_session(transcription, current_date, service_names)
+        # Parse session data with user's local date
+        session_data = await ai_service.parse_session(transcription, user_current_date, service_names, user_current_date)
         
         if not session_data:
             await processing_msg.edit_text(
@@ -399,18 +550,316 @@ async def handle_client_update(message: Message, processing_msg: Message, transc
             )
             return
         
-        # For now, we don't have a separate method to update only notes
-        # This functionality can be added in Phase 2
-        await processing_msg.edit_text(
-            "ℹ️ Обновление заметок о клиенте будет доступно в следующей версии.\n\n"
-            "Пока можно записать сеанс с заметками через голосовое сообщение."
-        )
+        # Update client info in sheets
+        success = await sheets_service.update_client_info(sheet_id, {
+            'client_name': client_edit_data.client_name,
+            'target_field': client_edit_data.target_field,
+            'content_to_append': client_edit_data.content_to_append
+        })
         
-        logger.info(f"User <TG_ID:{tg_id}> attempted client update")
+        if success:
+            # Map field names to Russian
+            field_names = {
+                'anamnesis': 'Анамнез',
+                'notes': 'Заметки',
+                'contacts': 'Контакты'
+            }
+            field_name = field_names.get(client_edit_data.target_field, 'Заметки')
+            
+            response = f"📝 <b>Заметка добавлена в карту клиента</b>\n\n"
+            response += f"👤 <b>Клиент:</b> {client_edit_data.client_name}\n"
+            response += f"📖 <b>Раздел:</b> {field_name}\n\n"
+            response += f"✅ Добавлено: \"{client_edit_data.content_to_append}\""
+            
+            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
+            logger.info(f"User <TG_ID:{tg_id}> updated client info")
+        else:
+            await processing_msg.edit_text(
+                "❌ Ошибка обновления информации."
+            )
         
     except Exception as e:
         logger.error(f"Error handling client update: {e}")
         await processing_msg.edit_text(f"❌ Ошибка обновления информации: {str(e)}")
+
+
+async def handle_booking(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
+    """Handle future booking/appointment creation flow"""
+    try:
+        # Get user's timezone and calculate local date
+        user_timezone_str = await db_service.get_user_timezone(tg_id)
+        try:
+            user_tz = pytz.timezone(user_timezone_str)
+            user_now = datetime.now(user_tz)
+            user_current_date = user_now.strftime('%Y-%m-%d')
+        except Exception as tz_error:
+            logger.warning(f"Failed to parse timezone '{user_timezone_str}': {tz_error}, using server time")
+            tz = pytz.timezone(Config.TIMEZONE)
+            user_current_date = datetime.now(tz).strftime('%Y-%m-%d')
+        
+        # Parse booking data with user's local date
+        booking_data = await ai_service.parse_booking(transcription, user_current_date, user_current_date)
+        
+        if not booking_data:
+            await processing_msg.edit_text(
+                "❌ Не удалось извлечь информацию о записи.\n\n"
+                "Укажите:\n"
+                "• Имя клиента\n"
+                "• Дату (например, 'завтра', 'во вторник')\n"
+                "• Время (например, '14:00', '3 PM')",
+                parse_mode=ParseMode.HTML
+            )
+            return
+        
+        # Add booking to sheets
+        try:
+            await sheets_service.add_booking(sheet_id, {
+                'client_name': booking_data.client_name,
+                'date': booking_data.date,
+                'time': booking_data.time,
+                'service_name': booking_data.service_name,
+                'duration': booking_data.duration,
+                'notes': booking_data.notes
+            })
+            
+            # Privacy-compliant logging
+            logger.info(f"User <TG_ID:{tg_id}> created a booking")
+            
+            # Format date for display (DD.MM and weekday)
+            try:
+                date_obj = datetime.strptime(booking_data.date, '%Y-%m-%d')
+                date_display = date_obj.strftime('%d.%m')
+                weekday_names = {
+                    'Monday': 'Понедельник',
+                    'Tuesday': 'Вторник',
+                    'Wednesday': 'Среда',
+                    'Thursday': 'Четверг',
+                    'Friday': 'Пятница',
+                    'Saturday': 'Суббота',
+                    'Sunday': 'Воскресенье'
+                }
+                weekday_en = date_obj.strftime('%A')
+                weekday = weekday_names.get(weekday_en, weekday_en)
+            except:
+                date_display = booking_data.date
+                weekday = ''
+            
+            # Format response
+            response = "✅ <b>Запись создана</b>\n\n"
+            response += f"📅 {date_display}"
+            if weekday:
+                response += f" ({weekday})"
+            response += f" в {booking_data.time}\n"
+            response += f"👤 <b>Клиент:</b> {booking_data.client_name}\n"
+            
+            if booking_data.service_name:
+                response += f"💆‍♀️ <b>Услуга:</b> {booking_data.service_name}\n"
+            
+            if booking_data.duration:
+                response += f"⏱️ <b>Длительность:</b> {booking_data.duration} мин\n"
+            
+            if booking_data.notes:
+                response += f"\n📝 <b>Заметка:</b> {booking_data.notes}"
+            
+            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
+            
+        except PermissionError:
+            service_email = Config.get_service_account_email()
+            await processing_msg.edit_text(
+                f"🚫 <b>Я потерял доступ к вашей таблице</b>\n\n"
+                f"Проверьте, что:\n"
+                f"1. Таблица не удалена\n"
+                f"2. Мой робот имеет доступ Редактора:\n"
+                f"   <code>{service_email}</code>\n\n"
+                f"Если вы удалили доступ, откройте таблицу и снова добавьте меня.",
+                parse_mode=ParseMode.HTML
+            )
+        except Exception as e:
+            logger.error(f"Error adding booking: {e}")
+            await processing_msg.edit_text(
+                f"❌ Ошибка создания записи:\n{str(e)}"
+            )
+            
+    except Exception as e:
+        logger.error(f"Error handling booking: {e}")
+        await processing_msg.edit_text(f"❌ Ошибка обработки записи: {str(e)}")
+
+
+async def handle_client_query(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
+    """Handle client information query flow"""
+    try:
+        # Parse client query data
+        client_query_data = await ai_service.parse_client_query(transcription)
+        
+        if not client_query_data:
+            await processing_msg.edit_text(
+                "❌ Не удалось понять запрос.\n\n"
+                "Укажите имя клиента.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+        
+        # Get client info from sheets
+        client_info = await sheets_service.get_client(sheet_id, client_query_data.client_name)
+        
+        if not client_info:
+            await processing_msg.edit_text(f"❌ Клиент '{client_query_data.client_name}' не найден")
+            return
+        
+        # Privacy-compliant logging
+        logger.info(f"User <TG_ID:{tg_id}> queried client info")
+        
+        # Format response
+        response = f"👤 <b>{client_info['name']}</b>\n\n"
+        
+        if client_info.get('phone_contact'):
+            response += f"📱 <b>Контакт:</b> {client_info['phone_contact']}\n\n"
+        
+        if client_info.get('anamnesis'):
+            response += f"🏥 <b>Анамнез:</b>\n{client_info['anamnesis']}\n\n"
+        
+        if client_info.get('notes'):
+            response += f"📝 <b>Заметки:</b>\n{client_info['notes']}\n\n"
+        
+        if client_info.get('ltv'):
+            try:
+                ltv_value = float(client_info['ltv'])
+                ltv_formatted = f"{ltv_value:,.0f}".replace(',', ' ')
+                response += f"💰 <b>LTV:</b> {ltv_formatted}₽\n"
+            except:
+                response += f"💰 <b>LTV:</b> {client_info['ltv']}₽\n"
+        
+        if client_info.get('last_visit_date'):
+            response += f"📅 <b>Последний визит:</b> {client_info['last_visit_date']}\n"
+        
+        if client_info.get('next_reminder'):
+            response += f"🔔 <b>Следующая запись:</b> {client_info['next_reminder']}\n"
+        
+        # Show session history
+        session_history = client_info.get('session_history', [])
+        if session_history:
+            response += f"\n📋 <b>Последние сеансы:</b>\n"
+            for session in session_history[-5:]:  # Last 5 sessions
+                response += f"  • {session['date']}: {session['service']} ({session['price']}₽)\n"
+        
+        # Add ambiguity warning if applicable
+        if client_info.get('_is_ambiguous', False):
+            alternatives = client_info.get('_alternatives', [])
+            if alternatives:
+                response += f"\n⚠️ <b>Найдено несколько совпадений:</b> {', '.join(alternatives)}\n"
+                response += f"Использована: {client_info['name']}\n"
+                response += f"Если это не та клиентка, уточните запрос."
+        
+        await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
+        
+    except Exception as e:
+        logger.error(f"Error handling client query: {e}")
+        await processing_msg.edit_text(f"❌ Ошибка получения данных: {str(e)}")
+
+
+async def send_morning_briefs():
+    """
+    Send daily schedule summary to users at their local 09:00 AM
+    Runs every hour and checks each user's local time
+    """
+    logger.info("Starting hourly morning brief check...")
+    
+    try:
+        # Get all active users with their timezones
+        users = await db_service.get_all_active_users()
+        logger.info(f"Checking {len(users)} active users for morning briefs")
+        
+        # Get current UTC time
+        utc_now = datetime.utcnow()
+        
+        sent_count = 0
+        error_count = 0
+        skipped_count = 0
+        
+        for user in users:
+            tg_id = user['tg_id']
+            sheet_id = user['sheet_id']
+            timezone_str = user['timezone']
+            
+            try:
+                # Calculate user's local time
+                try:
+                    user_tz = pytz.timezone(timezone_str)
+                    user_local_time = pytz.utc.localize(utc_now).astimezone(user_tz)
+                except Exception as tz_error:
+                    logger.warning(f"Invalid timezone '{timezone_str}' for user {tg_id}: {tz_error}, using default")
+                    user_tz = pytz.timezone('Europe/Moscow')
+                    user_local_time = pytz.utc.localize(utc_now).astimezone(user_tz)
+                
+                # Check if it's 9 AM in user's local time
+                if user_local_time.hour != 9:
+                    skipped_count += 1
+                    continue
+                
+                # Get today's date in user's timezone
+                today_date = user_local_time.strftime('%Y-%m-%d')
+                today_display = user_local_time.strftime('%d.%m')
+                
+                # Get daily schedule
+                appointments = await sheets_service.get_daily_schedule(sheet_id, today_date)
+                
+                # Only send if there are appointments
+                if not appointments:
+                    logger.info(f"No appointments for user {tg_id}, skipping")
+                    skipped_count += 1
+                    continue
+                
+                # Format message
+                message = f"🌅 <b>Доброе утро! План на сегодня ({today_display}):</b>\n\n"
+                
+                for appointment in appointments:
+                    time = appointment.get('time', '')
+                    client_name = appointment.get('client_name', 'Неизвестно')
+                    service_type = appointment.get('service_type', '')
+                    duration = appointment.get('duration', '')
+                    notes = appointment.get('notes', '')
+                    
+                    message += f"<b>{time}</b> — {client_name}"
+                    if service_type:
+                        message += f" ({service_type})"
+                    message += "\n"
+                    
+                    if duration:
+                        try:
+                            dur_int = int(duration)
+                            message += f"{dur_int} минут\n"
+                        except:
+                            pass
+                    
+                    if notes:
+                        message += f"❗ <b>Заметка:</b> {notes}\n"
+                    
+                    message += "\n"
+                
+                message += "Хорошего рабочего дня! ☀️"
+                
+                # Send message
+                await bot.send_message(
+                    chat_id=tg_id,
+                    text=message,
+                    parse_mode=ParseMode.HTML
+                )
+                
+                sent_count += 1
+                logger.info(f"Sent morning brief to user {tg_id} (timezone: {timezone_str}) with {len(appointments)} appointments")
+                
+                # Small delay to avoid rate limiting
+                await asyncio.sleep(0.5)
+                
+            except Exception as e:
+                error_count += 1
+                logger.error(f"Failed to send morning brief to user {tg_id}: {e}")
+                continue
+        
+        logger.info(f"Morning brief check completed: {sent_count} sent, {skipped_count} skipped (wrong hour or no appointments), {error_count} errors")
+        
+    except Exception as e:
+        logger.error(f"Error in send_morning_briefs: {e}")
 
 
 async def on_startup():
@@ -425,12 +874,30 @@ async def on_startup():
     await sheets_service.initialize()
     logger.info("Google Sheets service initialized")
     
+    # Start scheduler
+    scheduler.add_job(
+        send_morning_briefs,
+        trigger='cron',
+        minute=0,  # Run every hour at :00 minute
+        id='morning_briefs',
+        replace_existing=True,
+        misfire_grace_time=3600  # 1 hour grace period
+    )
+    scheduler.start()
+    logger.info("Scheduler started - morning briefs will check hourly for users at local 09:00")
+    
     logger.info("Bot is ready!")
 
 
 async def on_shutdown():
     """Cleanup on shutdown"""
     logger.info("Shutting down bot...")
+    
+    # Shutdown scheduler
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
+        logger.info("Scheduler shut down")
+    
     await bot.session.close()
 
 
