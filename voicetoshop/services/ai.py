@@ -90,6 +90,19 @@ class SaleData(BaseModel):
     reminder: Optional[ReminderInfo] = Field(default=None, description="Optional reminder to schedule")
 
 
+class SessionData(BaseModel):
+    """Massage session data for logging"""
+    client_name: str = Field(description="Client full name")
+    service_name: str = Field(description="Type of massage/treatment performed")
+    price: float = Field(description="Amount charged for session", gt=0)
+    duration: Optional[int] = Field(default=None, description="Session length in minutes")
+    medical_notes: Optional[str] = Field(default=None, description="Medical complaints, pain, health conditions")
+    session_notes: Optional[str] = Field(default=None, description="Technical details of this session's treatment")
+    preference_notes: Optional[str] = Field(default=None, description="Non-medical preferences about session delivery")
+    phone_contact: Optional[str] = Field(default=None, description="Phone number or contact info")
+    next_appointment_date: Optional[str] = Field(default=None, description="Next appointment date in YYYY-MM-DD format")
+
+
 class AIService:
     """OpenAI integration for transcription and NLP"""
     
@@ -123,10 +136,10 @@ class AIService:
     @staticmethod
     async def classify_message(text: str) -> str:
         """
-        Classify if message is about Supply, Sale, Client Edit, or Query
+        Classify if message is about Session, Client Edit, or Query
         
         Returns:
-            "supply", "sale", "client_edit", or "query"
+            "log_session", "client_update", "consultation", or "add_service"
         """
         try:
             response = await client.chat.completions.create(
@@ -134,19 +147,20 @@ class AIService:
                 messages=[
                     {
                         "role": "system",
-                        "content": """You are a warehouse assistant. Determine if the user's message is about:
-- SUPPLY: Restocking inventory, receiving new products, incoming stock, adding items
-- SALE: Customer purchase, selling products, client transaction (includes mentions of price, buying, purchasing)
-- CLIENT_EDIT: ONLY adding personal notes/characteristics about client WITHOUT any sale/purchase information
-- QUERY: Questions about inventory, stock levels, asking "how many", "what's in stock", "show me"
+                        "content": """You are an expert assistant for massage therapists. Classify the therapist's message intent:
+
+- LOG_SESSION: Recording a completed session (contains client, service, price, complaints)
+- CLIENT_UPDATE: Adding notes about client WITHOUT session/payment details
+- CONSULTATION: Asking about client history or looking up information
+- ADD_SERVICE: Defining a new service type in their catalog
 
 Key indicators:
-- SALE: mentions price, buying, purchasing, "купила", "купил", "за X долларов", size and price together
-- CLIENT_EDIT: ONLY preferences, interests, characteristics WITHOUT purchase details
-- SUPPLY: adding to stock, "добавь", "поставка", receiving products, "пришло"
-- QUERY: questions about stock, "сколько", "что на складе", "покажи", "есть ли"
+- LOG_SESSION: mentions price, completed session, "сделали", "приходила", service type
+- CLIENT_UPDATE: ONLY preferences, interests, characteristics WITHOUT purchase details
+- CONSULTATION: questions about clients, "кто", "когда", "сколько"
+- ADD_SERVICE: defining new service, "добавь услугу"
 
-Respond with only one word: "supply", "sale", "client_edit", or "query"."""
+Respond with only one word: "log_session", "client_update", "consultation", or "add_service"."""
                     },
                     {
                         "role": "user",
@@ -158,11 +172,11 @@ Respond with only one word: "supply", "sale", "client_edit", or "query"."""
             
             classification = response.choices[0].message.content.strip().lower()
             logger.info(f"Message classified as: {classification}")
-            return classification if classification in ["supply", "sale", "client_edit", "query"] else "supply"
+            return classification if classification in ["log_session", "client_update", "consultation", "add_service"] else "log_session"
             
         except Exception as e:
             logger.error(f"Classification failed: {e}")
-            return "supply"  # Default to supply
+            return "log_session"  # Default to session logging
     
     @staticmethod
     async def parse_supply(text: str, existing_products: List[str]) -> Optional[SupplyData]:
@@ -467,6 +481,114 @@ IMPORTANT:
             
         except Exception as e:
             logger.error(f"Client edit parsing failed: {e}")
+            return None
+    
+    @staticmethod
+    async def parse_session(text: str, current_date: str, service_names: List[str] = None) -> Optional[SessionData]:
+        """
+        Parse massage session information from transcribed text
+        
+        Args:
+            text: Transcribed text
+            current_date: Current date in YYYY-MM-DD format
+            service_names: List of known service names for matching (optional)
+            
+        Returns:
+            SessionData object or None if parsing failed
+        """
+        try:
+            # Create service context if available
+            services_context = ""
+            if service_names:
+                services_context = f"\n\nKnown services:\n" + "\n".join([f"- {s}" for s in service_names])
+            
+            response = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"""Extract data from a massage therapist's voice note about a completed session.
+
+Today's date is: {current_date}{services_context}
+
+CRITICAL DISTINCTION:
+- medical_notes: Medical complaints, pain, health conditions, contraindications
+  Examples: "болит шея", "остеохондроз", "триггерные точки", "жалуется на"
+  
+- preference_notes: Non-medical preferences about session delivery
+  Examples: "масло без запаха", "сильное давление", "просила", "любит"
+  
+- session_notes: Technical details of THIS session's treatment
+  Examples: "проработали триггеры", "клиент доволен", "ей понравилось"
+
+RULES:
+- client_name: Extract full name (capitalize properly)
+- service_name: Normalize common abbreviations:
+  * "ШВЗ" → "Массаж шейно-воротниковой зоны"
+  * If matches known service, use exact name from list
+- price: REQUIRED. Extract numeric value.
+- duration: Extract minutes if mentioned, else null
+- phone_contact: Extract phone if mentioned
+- next_appointment_date: Convert relative dates to YYYY-MM-DD:
+  * "завтра" → tomorrow's date
+  * "во вторник" → next Tuesday
+  * "через неделю" → date + 7 days
+
+Example:
+Input: "Приходила новенькая, Ольга, жалуется на шею и остеохондроз. Сделали ШВЗ 30 минут за 1500. Ей понравилось, но просила в следующий раз масло без запаха."
+
+Output:
+{{
+  "client_name": "Ольга",
+  "service_name": "Массаж шейно-воротниковой зоны",
+  "price": 1500,
+  "duration": 30,
+  "medical_notes": "Жалобы на шею, остеохондроз",
+  "session_notes": "Клиент доволен",
+  "preference_notes": "Просит масло без запаха",
+  "phone_contact": null,
+  "next_appointment_date": null
+}}
+
+Return data in the specified JSON format."""
+                    },
+                    {
+                        "role": "user",
+                        "content": text
+                    }
+                ],
+                response_format={"type": "json_schema", "json_schema": {
+                    "name": "session_data",
+                    "strict": True,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "client_name": {"type": "string"},
+                            "service_name": {"type": "string"},
+                            "price": {"type": "number"},
+                            "duration": {"type": ["integer", "null"]},
+                            "medical_notes": {"type": ["string", "null"]},
+                            "session_notes": {"type": ["string", "null"]},
+                            "preference_notes": {"type": ["string", "null"]},
+                            "phone_contact": {"type": ["string", "null"]},
+                            "next_appointment_date": {"type": ["string", "null"]}
+                        },
+                        "required": ["client_name", "service_name", "price", "duration", "medical_notes", "session_notes", "preference_notes", "phone_contact", "next_appointment_date"],
+                        "additionalProperties": False
+                    }
+                }},
+                temperature=0
+            )
+            
+            import json
+            result = json.loads(response.choices[0].message.content)
+            session_data = SessionData(**result)
+            
+            logger.info(f"Parsed session data: {session_data.client_name} - {session_data.service_name}")
+            return session_data
+            
+        except Exception as e:
+            logger.error(f"Session parsing failed: {e}")
             return None
 
 

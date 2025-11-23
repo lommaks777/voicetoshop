@@ -21,14 +21,18 @@ class Config:
     
     # Telegram Configuration
     BOT_TOKEN = os.getenv("BOT_TOKEN")
-    ALLOWED_USER_ID = os.getenv("ALLOWED_USER_ID")
     
     # OpenAI Configuration
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     
     # Google Sheets Configuration
     GOOGLE_SHEETS_CREDENTIALS_BASE64 = os.getenv("GOOGLE_SHEETS_CREDENTIALS_BASE64")
-    GOOGLE_SHEET_KEY = os.getenv("GOOGLE_SHEET_KEY")
+    
+    # Template Sheet URL (public read-only template for users to copy)
+    TEMPLATE_SHEET_URL = os.getenv("TEMPLATE_SHEET_URL", "https://docs.google.com/spreadsheets/d/YOUR_TEMPLATE_ID/edit")
+    
+    # Database Configuration
+    DATABASE_PATH = os.getenv("DATABASE_PATH", "./users.db")
     
     # Timezone Configuration
     TIMEZONE = os.getenv("TIMEZONE", "Europe/Moscow")
@@ -40,23 +44,13 @@ class Config:
         
         if not cls.BOT_TOKEN:
             missing.append("BOT_TOKEN")
-        if not cls.ALLOWED_USER_ID:
-            missing.append("ALLOWED_USER_ID")
         if not cls.OPENAI_API_KEY:
             missing.append("OPENAI_API_KEY")
         if not cls.GOOGLE_SHEETS_CREDENTIALS_BASE64:
             missing.append("GOOGLE_SHEETS_CREDENTIALS_BASE64")
-        if not cls.GOOGLE_SHEET_KEY:
-            missing.append("GOOGLE_SHEET_KEY")
         
         if missing:
             raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
-        
-        # Validate ALLOWED_USER_ID is numeric
-        try:
-            int(cls.ALLOWED_USER_ID)
-        except ValueError:
-            raise ValueError("ALLOWED_USER_ID must be a valid integer")
         
         logger.info("Configuration validated successfully")
     
@@ -73,9 +67,14 @@ class Config:
             raise ValueError(f"Invalid GOOGLE_SHEETS_CREDENTIALS_BASE64: {e}")
     
     @classmethod
-    def get_allowed_user_id(cls):
-        """Get allowed user ID as integer"""
-        return int(cls.ALLOWED_USER_ID)
+    def get_service_account_email(cls) -> str:
+        """Extract client_email from decoded credentials for onboarding instructions"""
+        try:
+            creds = cls.get_google_credentials()
+            return creds.get("client_email", "service-account@project.iam.gserviceaccount.com")
+        except Exception as e:
+            logger.error(f"Failed to extract service account email: {e}")
+            return "service-account@project.iam.gserviceaccount.com"
 
 
 # Validate configuration on module import

@@ -26,3 +26,6 @@ pytz==2024.2
 
 # Audio Processing (if needed for format conversion)
 pydub==0.25.1
+
+# SQLite Async Database
+aiosqlite==0.20.0

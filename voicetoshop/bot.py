@@ -1,17 +1,16 @@
 import asyncio
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import Message, CallbackQuery
 from aiogram.enums import ParseMode
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.interval import IntervalTrigger
 import pytz
 
 from config import Config
+from database import db_service
 from services.sheets import sheets_service
 from services.ai import ai_service
 
@@ -26,58 +25,86 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=Config.BOT_TOKEN)
 dp = Dispatcher()
 
-# Scheduler for reminders
-scheduler = AsyncIOScheduler(timezone=pytz.timezone(Config.TIMEZONE))
+# Onboarding state tracking (in-memory)
+onboarding_states = {}  # {tg_id: "AWAITING_SHEET_URL"}
 
 
-# Authorization middleware
-def is_authorized(message: Message) -> bool:
-    """Check if user is authorized"""
-    return message.from_user.id == Config.get_allowed_user_id()
+async def get_user_context(tg_id: int) -> dict:
+    """
+    Get user context (sheet_id) from database
+    
+    Returns:
+        dict with 'tg_id' and 'sheet_id' if user registered, None otherwise
+    """
+    sheet_id = await db_service.get_user_sheet_id(tg_id)
+    
+    if sheet_id:
+        # Update last active timestamp
+        await db_service.update_last_active(tg_id)
+        return {'tg_id': tg_id, 'sheet_id': sheet_id}
+    
+    return None
 
 
 @dp.message(Command("start"))
 async def cmd_start(message: Message):
-    """Handle /start command"""
-    if not is_authorized(message):
-        logger.warning(f"Unauthorized access attempt from user {message.from_user.id}")
-        return
+    """Handle /start command - onboarding or welcome back"""
+    tg_id = message.from_user.id
+    user_exists = await db_service.user_exists(tg_id)
     
-    welcome_text = """
-🎙️ <b>VoiceStock Bot</b>
+    if user_exists:
+        await message.answer(
+            "Добро пожаловать! 🙋‍♀️\n\n"
+            "Отправьте голосовое сообщение о сеансе массажа, и я занесу данные в вашу таблицу.\n\n"
+            "Команды:\n"
+            "/client <имя> - посмотреть информацию о клиенте"
+        )
+    else:
+        await start_onboarding(message)
 
-Добро пожаловать! Я помогаю управлять складом и клиентами.
 
-<b>Как использовать:</b>
-• Отправьте голосовое сообщение о поступлении товара
-• Отправьте голосовое сообщение о продаже
-• Отправьте голосовое сообщение с заметкой о клиенте
-• Используйте команды для управления клиентами
-• Я сделаю всё остальное!
-
-<b>Команды:</b>
-/client <имя> - посмотреть информацию о клиенте
-/edit <имя> | <заметка> - добавить заметку о клиенте
-
-<b>Примеры:</b>
-📦 <i>"Получил белые трусики, 5 штук размер M и 3 штуки размер L"</i>
-💰 <i>"Клиент Анна Иванова купила черные трусики размер M за 40 долларов, напомни через неделю предложить купальник"</i>
-📝 <i>"Добавь информацию о клиенте Анна Иванова: она любит кошек и яркие цвета"</i>
-/edit Анна Иванова | Любит кошек и яркие цвета
-    """
+async def start_onboarding(message: Message):
+    """Start onboarding flow for new user"""
+    tg_id = message.from_user.id
+    onboarding_states[tg_id] = "AWAITING_SHEET_URL"
     
-    await message.answer(welcome_text, parse_mode=ParseMode.HTML)
+    service_email = Config.get_service_account_email()
+    template_url = Config.TEMPLATE_SHEET_URL
+    
+    await message.answer(
+        f"Привет! Я твой ИИ-помощник для управления клиентами массажа. 💆‍♀️\n\n"
+        f"Чтобы начать:\n\n"
+        f"📋 <b>Шаг 1:</b> Скопируй этот шаблон себе\n"
+        f"{template_url}\n\n"
+        f"🔑 <b>Шаг 2:</b> Нажми \"Настройки доступа\" (кнопка Share) и добавь моего робота как <b>Редактора (Editor)</b>:\n"
+        f"<code>{service_email}</code>\n\n"
+        f"📤 <b>Шаг 3:</b> Пришли мне ссылку на твою таблицу",
+        parse_mode=ParseMode.HTML
+    )
 
 
 @dp.message(Command("client"))
 async def cmd_client(message: Message):
     """Handle /client command - view client info"""
-    if not is_authorized(message):
+    tg_id = message.from_user.id
+    logger.info(f"User <TG_ID:{tg_id}> called /client command")
+    
+    # Check if user is registered
+    context = await get_user_context(tg_id)
+    if not context:
+        await message.answer(
+            "❌ Вы не зарегистрированы.\n\n"
+            "Отправьте /start для регистрации."
+        )
         return
+    
+    sheet_id = context['sheet_id']
     
     # Extract client name from command
     text = message.text or ""
     parts = text.split(maxsplit=1)
+    
+    logger.info(f"Command text: '{text}', parts: {parts}")
     
     if len(parts) < 2:
         await message.answer(
@@ -88,105 +115,155 @@ async def cmd_client(message: Message):
         return
     
     client_name = parts[1].strip()
+    logger.info(f"Looking up client: '{client_name}'")
     
     try:
         # Get client info from sheets
-        client_info = await sheets_service.get_client(client_name)
+        client_info = await sheets_service.get_client(sheet_id, client_name)
         
         if not client_info:
             await message.answer(f"❌ Клиент '{client_name}' не найден")
             return
         
+        # Privacy-compliant logging
+        logger.info(f"User <TG_ID:{tg_id}> looked up client")
+        
         # Format response
         response = f"📋 <b>Информация о клиенте</b>\n\n"
         response += f"👤 <b>Имя:</b> {client_info['name']}\n"
         
-        if client_info.get('instagram'):
-            response += f"📱 <b>Instagram:</b> @{client_info['instagram']}\n"
-        if client_info.get('telegram'):
-            response += f"💬 <b>Telegram:</b> @{client_info['telegram']}\n"
+        if client_info.get('phone_contact'):
+            response += f"📱 <b>Контакт:</b> {client_info['phone_contact']}\n"
         
-        if client_info.get('description'):
-            response += f"\n📝 <b>Описание:</b>\n{client_info['description']}\n"
+        if client_info.get('anamnesis'):
+            response += f"\n🏥 <b>Анамнез:</b>\n{client_info['anamnesis']}\n"
         
-        if client_info.get('transactions'):
-            response += f"\n💰 <b>История покупок:</b>\n{client_info['transactions']}\n"
+        if client_info.get('notes'):
+            response += f"\n📝 <b>Заметки:</b>\n{client_info['notes']}\n"
         
-        if client_info.get('reminder_date'):
-            response += f"\n🔔 <b>Напоминание на {client_info['reminder_date']}:</b>\n"
-            response += f"{client_info.get('reminder_text', '')}\n"
+        if client_info.get('ltv'):
+            response += f"\n💰 <b>LTV:</b> {client_info['ltv']}₽\n"
+        
+        if client_info.get('last_visit_date'):
+            response += f"📅 <b>Последний визит:</b> {client_info['last_visit_date']}\n"
+        
+        if client_info.get('next_reminder'):
+            response += f"🔔 <b>Следующая запись:</b> {client_info['next_reminder']}\n"
+        
+        # Show session history
+        session_history = client_info.get('session_history', [])
+        if session_history:
+            response += f"\n📊 <b>История сеансов:</b>\n"
+            for session in session_history[-5:]:  # Last 5 sessions
+                response += f"  • {session['date']}: {session['service']} ({session['price']}₽)\n"
         
         await message.answer(response, parse_mode=ParseMode.HTML)
         
     except Exception as e:
-        logger.error(f"Error getting client info: {e}")
+        logger.error(f"Error getting client info: {e}", exc_info=True)
         await message.answer(f"❌ Ошибка получения данных: {str(e)}")
 
 
-@dp.message(Command("edit"))
-async def cmd_edit_client(message: Message):
-    """Handle /edit command - add notes to client"""
-    if not is_authorized(message):
+@dp.message(Command("stats"))
+async def cmd_stats(message: Message):
+    """Show bot statistics (admin feature)"""
+    try:
+        total_users = await db_service.get_total_users()
+        
+        await message.answer(
+            f"📊 <b>Статистика бота</b>\n\n"
+            f"👥 Всего пользователей: {total_users}",
+            parse_mode=ParseMode.HTML
+        )
+    except Exception as e:
+        logger.error(f"Error getting stats: {e}")
+        await message.answer("❌ Ошибка получения статистики")
+
+
+@dp.message(F.text)
+async def handle_text(message: Message):
+    """Handle text messages - onboarding URL or client lookup"""
+    tg_id = message.from_user.id
+    
+    # Check if user is in onboarding
+    if onboarding_states.get(tg_id) == "AWAITING_SHEET_URL":
+        await process_sheet_url(message)
         return
     
-    # Extract client name and note from command
-    text = message.text or ""
-    parts = text.split(maxsplit=1)
-    
-    if len(parts) < 2:
+    # Check if user is registered
+    context = await get_user_context(tg_id)
+    if not context:
         await message.answer(
-            "❌ Неверный формат команды\n\n"
-            "<b>Использование:</b> /edit Имя Клиента | Заметка\n\n"
-            "<b>Пример:</b> /edit Анна Иванова | Любит кошек и яркие цвета",
-            parse_mode=ParseMode.HTML
+            "❌ Вы не зарегистрированы.\n\n"
+            "Отправьте /start для регистрации."
         )
         return
     
-    content = parts[1].strip()
+    # Handle regular text (future: could be natural language queries)
+    await message.answer(
+        "Для записи сеанса отправьте голосовое сообщение.\n\n"
+        "Для просмотра клиента используйте: /client <имя>"
+    )
+
+
+async def process_sheet_url(message: Message):
+    """Process sheet URL during onboarding"""
+    tg_id = message.from_user.id
+    url = message.text.strip()
     
-    if '|' not in content:
-        await message.answer(
-            "❌ Используйте символ | для разделения имени и заметки\n\n"
-            "<b>Пример:</b> /edit Анна Иванова | Любит кошек",
-            parse_mode=ParseMode.HTML
-        )
-        return
-    
-    client_name, note = content.split('|', 1)
-    client_name = client_name.strip()
-    note = note.strip()
-    
-    if not client_name or not note:
-        await message.answer("❌ Укажите имя клиента и заметку")
-        return
+    # Show processing message
+    processing_msg = await message.answer("🔄 Проверяю доступ к таблице...")
     
     try:
-        # Update client with new note
-        client_data = {
-            'name': client_name,
-            'description': note  # Changed from 'notes' to 'description'
-        }
+        # Validate and connect to sheet
+        success, msg, sheet_id = await sheets_service.validate_and_connect(url)
         
-        await sheets_service.upsert_client(client_data)
-        
-        await message.answer(
-            f"✅ <b>Заметка добавлена</b>\n\n"
-            f"👤 Клиент: {client_name}\n"
-            f"📝 Заметка: {note}",
-            parse_mode=ParseMode.HTML
-        )
-        
+        if success:
+            # Register user in database
+            result = await db_service.add_user(tg_id, sheet_id)
+            
+            if result:
+                # Clear onboarding state
+                onboarding_states.pop(tg_id, None)
+                
+                await processing_msg.edit_text(
+                    f"✅ <b>Готово!</b>\n\n"
+                    f"Ваша таблица подключена.\n"
+                    f"Теперь можете отправлять голосовые сообщения о сеансах массажа.",
+                    parse_mode=ParseMode.HTML
+                )
+                
+                logger.info(f"User onboarded: TG_ID {tg_id}, Sheet {sheet_id}")
+            else:
+                await processing_msg.edit_text(
+                    "❌ Ошибка сохранения данных. Попробуйте позже."
+                )
+        else:
+            await processing_msg.edit_text(msg, parse_mode=ParseMode.HTML)
+            
     except Exception as e:
-        logger.error(f"Error editing client: {e}")
-        await message.answer(f"❌ Ошибка обновления данных: {str(e)}")
+        logger.error(f"Error processing sheet URL: {e}")
+        await processing_msg.edit_text(
+            "❌ Произошла ошибка при проверке таблицы.\n\n"
+            "Попробуйте еще раз или обратитесь в поддержку."
+        )
 
 
 @dp.message(F.voice)
 async def handle_voice(message: Message):
-    """Handle voice messages"""
-    if not is_authorized(message):
-        logger.warning(f"Unauthorized voice message from user {message.from_user.id}")
+    """Handle voice messages - main session logging flow"""
+    tg_id = message.from_user.id
+    
+    # Check if user is registered
+    context = await get_user_context(tg_id)
+    if not context:
+        await message.answer(
+            "❌ Вы не зарегистрированы.\n\n"
+            "Отправьте /start для регистрации."
+        )
         return
+    
+    sheet_id = context['sheet_id']
     
     # Send processing message
     processing_msg = await message.answer("🎧 Обрабатываю голосовое сообщение...")
@@ -208,474 +285,145 @@ async def handle_voice(message: Message):
             await processing_msg.edit_text("🤷‍♂️ Не удалось распознать аудио. Попробуйте еще раз.")
             return
         
-        logger.info(f"Transcription: {transcription}")
+        # Privacy-compliant logging (no transcription content, only length)
+        logger.info(f"User <TG_ID:{tg_id}> sent voice message, transcription length: {len(transcription)} chars")
         
         # Classify message type
         message_type = await ai_service.classify_message(transcription)
         
-        if message_type == "supply":
-            await handle_supply(message, processing_msg, transcription)
-        elif message_type == "sale":
-            await handle_sale(message, processing_msg, transcription)
-        elif message_type == "client_edit":
-            await handle_client_edit(message, processing_msg, transcription)
-        elif message_type == "query":
-            await handle_query(message, processing_msg, transcription)
+        if message_type == "log_session":
+            await handle_session(message, processing_msg, transcription, sheet_id, tg_id)
+        elif message_type == "client_update":
+            await handle_client_update(message, processing_msg, transcription, sheet_id, tg_id)
+        elif message_type == "consultation":
+            await processing_msg.edit_text(
+                "Для просмотра информации о клиенте используйте команду:\n"
+                "/client <имя клиента>"
+            )
         else:
-            await handle_supply(message, processing_msg, transcription)
+            # Default to session logging
+            await handle_session(message, processing_msg, transcription, sheet_id, tg_id)
             
     except Exception as e:
         logger.error(f"Error processing voice message: {e}")
         await processing_msg.edit_text(f"❌ Ошибка обработки сообщения: {str(e)}")
 
 
-async def handle_supply(message: Message, processing_msg: Message, transcription: str):
-    """Handle supply/restock flow"""
-    try:
-        # Get existing products for fuzzy matching
-        existing_products = await sheets_service.get_all_products()
-        
-        # Parse supply data
-        supply_data = await ai_service.parse_supply(transcription, existing_products)
-        
-        if not supply_data or not supply_data.items:
-            await processing_msg.edit_text(
-                "❌ Не удалось извлечь информацию о товаре. Попробуйте еще раз с деталями:\n"
-                "<i>Название товара, размер и количество</i>",
-                parse_mode=ParseMode.HTML
-            )
-            return
-        
-        # Update inventory
-        items_to_update = [
-            {
-                'name': item.name,
-                'size': item.size,
-                'quantity': item.quantity,
-                'price': 0  # Price not required for supply
-            }
-            for item in supply_data.items
-        ]
-        
-        updated_items = await sheets_service.update_inventory(items_to_update, "Supply")
-        
-        # Format response
-        response = "✅ <b>Поставка добавлена</b>\n\n"
-        for item in updated_items:
-            response += f"📦 {item['name']} (Размер: {item['size']})\n"
-            response += f"   Добавлено: {[i.quantity for i in supply_data.items if i.name == item['name'] and i.size == item['size']][0]} шт\n"
-            response += f"   Текущий остаток: {item['qty']} шт\n\n"
-        
-        # Add undo button
-        import hashlib
-        timestamp = datetime.now().isoformat()
-        tx_hash = hashlib.md5(timestamp.encode()).hexdigest()[:8]
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(
-                text="🔙 Отменить поставку",
-                callback_data=f"undo_supply_{tx_hash}"
-            )]
-        ])
-        
-        await processing_msg.edit_text(response, parse_mode=ParseMode.HTML, reply_markup=keyboard)
-        
-    except Exception as e:
-        logger.error(f"Error handling supply: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обработки поставки: {str(e)}")
-
-
-async def handle_sale(message: Message, processing_msg: Message, transcription: str):
-    """Handle sale/customer flow - supports multiple items"""
+async def handle_session(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
+    """Handle session logging flow"""
     try:
         # Get current date
-        current_date = datetime.now().strftime('%Y-%m-%d')
+        tz = pytz.timezone(Config.TIMEZONE)
+        current_date = datetime.now(tz).strftime('%Y-%m-%d')
         
-        # Parse sale data
-        sale_data = await ai_service.parse_sale(transcription, current_date)
+        # Get service names for context (optional)
+        service_names = await sheets_service.get_services(sheet_id)
         
-        if not sale_data or not sale_data.items:
+        # Parse session data
+        session_data = await ai_service.parse_session(transcription, current_date, service_names)
+        
+        if not session_data:
             await processing_msg.edit_text(
-                "❌ Не удалось извлечь информацию о продаже. Укажите:\n"
-                "<i>Имя клиента, товар, размер, количество и цену</i>",
+                "❌ Не удалось извлечь информацию о сеансе.\n\n"
+                "Укажите:\n"
+                "• Имя клиента\n"
+                "• Услугу (например, ШВЗ, массаж спины)\n"
+                "• Цену",
                 parse_mode=ParseMode.HTML
             )
             return
         
-        # Update inventory for ALL items
-        items_to_update = []
-        for item in sale_data.items:
-            items_to_update.append({
-                'name': item.item_name,
-                'size': item.size,
-                'quantity': item.quantity,
-                'price': item.price,
-                'client_name': sale_data.client.name
-            })
-        
-        # Try to update inventory - will raise ValueError if item not in stock
+        # Log session to Google Sheets
         try:
-            updated_items = await sheets_service.update_inventory(items_to_update, "Sale")
-        except ValueError as e:
-            # Stock validation error - show user-friendly message
+            await sheets_service.log_session(sheet_id, {
+                'client_name': session_data.client_name,
+                'service_name': session_data.service_name,
+                'price': session_data.price,
+                'duration': session_data.duration,
+                'medical_notes': session_data.medical_notes,
+                'session_notes': session_data.session_notes,
+                'preference_notes': session_data.preference_notes,
+                'next_appointment_date': session_data.next_appointment_date
+            })
+            
+            # Privacy-compliant logging
+            logger.info(f"User <TG_ID:{tg_id}> logged a session")
+            
+            # Format response
+            response = "✅ <b>Сеанс записан</b>\n\n"
+            response += f"👤 <b>Клиент:</b> {session_data.client_name}\n"
+            response += f"💆‍♀️ <b>Услуга:</b> {session_data.service_name}\n"
+            response += f"💰 <b>Цена:</b> {session_data.price}₽\n"
+            
+            if session_data.duration:
+                response += f"⏱️ <b>Длительность:</b> {session_data.duration} мин\n"
+            
+            if session_data.next_appointment_date:
+                response += f"\n🗓️ <b>Следующая запись:</b> {session_data.next_appointment_date}\n"
+            
+            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
+            
+        except PermissionError:
+            service_email = Config.get_service_account_email()
             await processing_msg.edit_text(
-                f"❌ <b>Ошибка продажи</b>\n\n"
-                f"{str(e)}",
+                f"🚫 <b>Я потерял доступ к вашей таблице</b>\n\n"
+                f"Проверьте, что:\n"
+                f"1. Таблица не удалена\n"
+                f"2. Мой робот имеет доступ Редактора:\n"
+                f"   <code>{service_email}</code>\n\n"
+                f"Если вы удалили доступ, откройте таблицу и снова добавьте меня.",
                 parse_mode=ParseMode.HTML
             )
-            return
-        
-        # Update client data
-        reminder_date = None
-        if sale_data.reminder:
-            reminder_date = (datetime.now() + timedelta(days=sale_data.reminder.days_from_now)).strftime('%Y-%m-%d')
-        
-        # Prepare transaction note for ALL items
-        transaction_notes = []
-        total_amount = 0
-        for item in sale_data.items:
-            item_total = item.price * item.quantity
-            total_amount += item_total
-            transaction_notes.append(
-                f"Покупка: {item.item_name} (Размер: {item.size}) x{item.quantity} за ${item_total}"
+        except Exception as e:
+            logger.error(f"Error logging session: {e}")
+            await processing_msg.edit_text(
+                f"❌ Ошибка записи в таблицу:\n{str(e)}"
             )
-        
-        transaction_note = "; ".join(transaction_notes) + f" от {current_date}"
-        
-        client_data = {
-            'name': sale_data.client.name,
-            'instagram': sale_data.client.instagram or '',
-            'telegram': sale_data.client.telegram or '',
-            'description': sale_data.client.notes or '',  # Client characteristics go to Description
-            'transaction': transaction_note,  # Purchase history goes to Transactions
-            'reminder_date': reminder_date or '',
-            'reminder_text': sale_data.reminder.text if sale_data.reminder else ''
-        }
-        
-        await sheets_service.upsert_client(client_data)
-        
-        # Format response
-        response = "✅ <b>Продажа оформлена</b>\n\n"
-        response += f"👤 <b>Клиент:</b> {sale_data.client.name}\n"
-        
-        if sale_data.client.instagram:
-            response += f"📱 Instagram: @{sale_data.client.instagram}\n"
-        if sale_data.client.telegram:
-            response += f"💬 Telegram: @{sale_data.client.telegram}\n"
-        
-        response += f"\n💰 <b>Продажа ({len(sale_data.items)} товар(ов)):</b>\n"
-        
-        # Show each item
-        for idx, item in enumerate(sale_data.items, 1):
-            item_total = item.price * item.quantity
-            response += f"\n{idx}. {item.item_name} (Размер: {item.size})\n"
-            response += f"   Количество: {item.quantity} шт\n"
-            response += f"   Цена: ${item.price} за шт\n"
-            response += f"   Итого: ${item_total}\n"
             
-            # Get stock levels for this product
-            stock_levels = await sheets_service.get_stock_by_name(item.item_name)
-            response += f"   📊 Остаток:\n"
-            for stock in stock_levels:
-                warning = " ⚠️" if stock['qty'] <= 0 else ""
-                response += f"      Размер {stock['size']}: {stock['qty']} шт{warning}\n"
-        
-        response += f"\n💵 <b>Общая сумма: ${total_amount}</b>\n"
-        
-        if sale_data.reminder:
-            response += f"\n🔔 <b>Напоминание установлено на {reminder_date}:</b>\n"
-            response += f"   {sale_data.reminder.text}\n"
-        
-        # Add undo button (using timestamp as unique identifier)
-        timestamp = datetime.now().isoformat()
-        # Store transaction data for undo (using timestamp hash for shorter callback_data)
-        import hashlib
-        tx_hash = hashlib.md5(timestamp.encode()).hexdigest()[:8]
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(
-                text="🔙 Отменить продажу",
-                callback_data=f"undo_sale_{tx_hash}"
-            )]
-        ])
-        
-        await processing_msg.edit_text(response, parse_mode=ParseMode.HTML, reply_markup=keyboard)
-        
     except Exception as e:
-        logger.error(f"Error handling sale: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обработки продажи: {str(e)}")
+        logger.error(f"Error handling session: {e}")
+        await processing_msg.edit_text(f"❌ Ошибка обработки сеанса: {str(e)}")
 
 
-async def handle_client_edit(message: Message, processing_msg: Message, transcription: str):
-    """Handle client information edit flow"""
+async def handle_client_update(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
+    """Handle client information update flow"""
     try:
         # Parse client edit data
         client_edit_data = await ai_service.parse_client_edit(transcription)
         
         if not client_edit_data:
             await processing_msg.edit_text(
-                "❌ Не удалось извлечь информацию о клиенте. Укажите:\n"
-                "<i>Имя клиента и заметку/описание</i>",
+                "❌ Не удалось извлечь информацию о клиенте.\n\n"
+                "Укажите имя клиента и заметку.",
                 parse_mode=ParseMode.HTML
             )
             return
         
-        # Update client with new description (not transaction)
-        client_data = {
-            'name': client_edit_data.client_name,
-            'description': client_edit_data.notes  # Goes to Description column
-        }
+        # For now, we don't have a separate method to update only notes
+        # This functionality can be added in Phase 2
+        await processing_msg.edit_text(
+            "ℹ️ Обновление заметок о клиенте будет доступно в следующей версии.\n\n"
+            "Пока можно записать сеанс с заметками через голосовое сообщение."
+        )
         
-        await sheets_service.upsert_client(client_data)
-        
-        # Format response
-        response = "✅ <b>Информация о клиенте обновлена</b>\n\n"
-        response += f"👤 <b>Клиент:</b> {client_edit_data.client_name}\n"
-        response += f"📝 <b>Добавлено в описание:</b> {client_edit_data.notes}\n"
-        
-        # Add undo button
-        import hashlib
-        timestamp = datetime.now().isoformat()
-        tx_hash = hashlib.md5(timestamp.encode()).hexdigest()[:8]
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(
-                text="🔙 Отменить изменение",
-                callback_data=f"undo_client_{client_edit_data.client_name}_{tx_hash}"
-            )]
-        ])
-        
-        await processing_msg.edit_text(response, parse_mode=ParseMode.HTML, reply_markup=keyboard)
+        logger.info(f"User <TG_ID:{tg_id}> attempted client update")
         
     except Exception as e:
-        logger.error(f"Error handling client edit: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обновления информации о клиенте: {str(e)}")
-
-
-async def handle_query(message: Message, processing_msg: Message, transcription: str):
-    """Handle inventory query - show current stock"""
-    try:
-        # Get all inventory records
-        inventory_ws = await sheets_service.spreadsheet.worksheet(sheets_service.INVENTORY_SHEET)
-        records = await inventory_ws.get_all_records()
-        
-        if not records:
-            await processing_msg.edit_text(
-                "📦 <b>Склад пуст</b>\n\n"
-                "Нет товаров на складе.",
-                parse_mode=ParseMode.HTML
-            )
-            return
-        
-        # Group by product name
-        products = {}
-        for record in records:
-            name = record.get('Name', '')
-            size = record.get('Size', '')
-            qty = int(record.get('Qty', 0))
-            price = float(record.get('Price', 0))
-            
-            if name:
-                if name not in products:
-                    products[name] = []
-                products[name].append({
-                    'size': size,
-                    'qty': qty,
-                    'price': price
-                })
-        
-        # Format response
-        response = "📦 <b>Текущий остаток на складе</b>\n\n"
-        
-        for product_name, sizes in sorted(products.items()):
-            response += f"<b>{product_name}</b>\n"
-            for size_info in sorted(sizes, key=lambda x: x['size']):
-                qty = size_info['qty']
-                size = size_info['size']
-                price = size_info['price']
-                
-                warning = " ⚠️" if qty <= 0 else ""
-                price_str = f" (${price})" if price > 0 else ""
-                response += f"   • Размер {size}: {qty} шт{price_str}{warning}\n"
-            response += "\n"
-        
-        # Count total items
-        total_qty = sum(size_info['qty'] for sizes in products.values() for size_info in sizes)
-        response += f"<b>Всего товаров:</b> {total_qty} шт\n"
-        response += f"<b>Всего наименований:</b> {len(products)}\n"
-        
-        await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
-        
-    except Exception as e:
-        logger.error(f"Error handling query: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка получения данных о складе: {str(e)}")
-
-
-@dp.callback_query(F.data.startswith("undo_sale_"))
-async def handle_undo_sale(callback: CallbackQuery):
-    """Handle undo sale button"""
-    if not callback.from_user or callback.from_user.id != Config.get_allowed_user_id():
-        await callback.answer("Unauthorized", show_alert=True)
-        return
-    
-    try:
-        success = await sheets_service.undo_last_sale()
-        
-        if success:
-            await callback.answer("✅ Продажа отменена успешно", show_alert=True)
-            
-            if callback.message:
-                await callback.message.edit_text(
-                    f"🔙 <b>Продажа отменена</b>\n\n"
-                    f"Последняя транзакция продажи отменена.\n"
-                    f"Остатки обновлены.",
-                    parse_mode=ParseMode.HTML
-                )
-        else:
-            await callback.answer("❌ Не удалось отменить продажу", show_alert=True)
-            
-    except Exception as e:
-        logger.error(f"Error undoing sale: {e}")
-        await callback.answer(f"Ошибка: {str(e)}", show_alert=True)
-
-
-@dp.callback_query(F.data.startswith("undo_supply_"))
-async def handle_undo_supply(callback: CallbackQuery):
-    """Handle undo supply button"""
-    if not callback.from_user or callback.from_user.id != Config.get_allowed_user_id():
-        await callback.answer("Unauthorized", show_alert=True)
-        return
-    
-    try:
-        success = await sheets_service.undo_last_supply()
-        
-        if success:
-            await callback.answer("✅ Поставка отменена успешно", show_alert=True)
-            
-            if callback.message:
-                await callback.message.edit_text(
-                    f"🔙 <b>Поставка отменена</b>\n\n"
-                    f"Последняя транзакция поставки отменена.\n"
-                    f"Остатки обновлены.",
-                    parse_mode=ParseMode.HTML
-                )
-        else:
-            await callback.answer("❌ Не удалось отменить поставку", show_alert=True)
-            
-    except Exception as e:
-        logger.error(f"Error undoing supply: {e}")
-        await callback.answer(f"Ошибка: {str(e)}", show_alert=True)
-
-
-@dp.callback_query(F.data.startswith("undo_client_"))
-async def handle_undo_client(callback: CallbackQuery):
-    """Handle undo client edit button"""
-    if not callback.from_user or callback.from_user.id != Config.get_allowed_user_id():
-        await callback.answer("Unauthorized", show_alert=True)
-        return
-    
-    try:
-        # Extract client name from callback data
-        # Format: undo_client_{name}_{hash}
-        parts = callback.data.split('_', 3)
-        if len(parts) >= 3:
-            client_name = parts[2]
-        else:
-            await callback.answer("❌ Неверный формат данных", show_alert=True)
-            return
-        
-        success = await sheets_service.undo_last_client_update(client_name)
-        
-        if success:
-            await callback.answer("✅ Изменение отменено успешно", show_alert=True)
-            
-            if callback.message:
-                await callback.message.edit_text(
-                    f"🔙 <b>Изменение отменено</b>\n\n"
-                    f"Последнее изменение для клиента {client_name} отменено.",
-                    parse_mode=ParseMode.HTML
-                )
-        else:
-            await callback.answer("❌ Не удалось отменить изменение", show_alert=True)
-            
-    except Exception as e:
-        logger.error(f"Error undoing client edit: {e}")
-        await callback.answer(f"Ошибка: {str(e)}", show_alert=True)
-
-
-@dp.callback_query(F.data.startswith("undo_"))
-async def handle_undo_legacy(callback: CallbackQuery):
-    """Handle legacy undo button (for backward compatibility)"""
-    if not callback.from_user or callback.from_user.id != Config.get_allowed_user_id():
-        await callback.answer("Unauthorized", show_alert=True)
-        return
-    
-    try:
-        # This is for old sale undo buttons without _sale_ prefix
-        success = await sheets_service.undo_last_sale()
-        
-        if success:
-            await callback.answer("✅ Продажа отменена успешно", show_alert=True)
-            
-            if callback.message:
-                await callback.message.edit_text(
-                    f"🔙 <b>Продажа отменена</b>\n\n"
-                    f"Последняя транзакция продажи отменена.\n"
-                    f"Остатки обновлены.",
-                    parse_mode=ParseMode.HTML
-                )
-        else:
-            await callback.answer("❌ Не удалось отменить продажу", show_alert=True)
-            
-    except Exception as e:
-        logger.error(f"Error undoing sale: {e}")
-        await callback.answer(f"Ошибка: {str(e)}", show_alert=True)
-
-
-async def check_reminders():
-    """Check and send due reminders (runs hourly)"""
-    try:
-        logger.info("Checking for due reminders...")
-        reminders = await sheets_service.get_reminders_for_today()
-        
-        for reminder in reminders:
-            try:
-                message_text = f"🔔 <b>Напоминание для {reminder['name']}</b>\n\n{reminder['text']}"
-                await bot.send_message(
-                    chat_id=Config.get_allowed_user_id(),
-                    text=message_text,
-                    parse_mode=ParseMode.HTML
-                )
-                
-                # Clear the reminder
-                await sheets_service.clear_reminder(reminder['name'])
-                logger.info(f"Sent and cleared reminder for {reminder['name']}")
-                
-            except Exception as e:
-                logger.error(f"Failed to send reminder for {reminder['name']}: {e}")
-        
-        if reminders:
-            logger.info(f"Processed {len(reminders)} reminders")
-        
-    except Exception as e:
-        logger.error(f"Error checking reminders: {e}")
+        logger.error(f"Error handling client update: {e}")
+        await processing_msg.edit_text(f"❌ Ошибка обновления информации: {str(e)}")
 
 
 async def on_startup():
     """Initialize services on startup"""
-    logger.info("Starting VoiceStock Bot...")
+    logger.info("Starting Massage CRM Bot...")
+    
+    # Initialize database
+    await db_service.initialize(Config.DATABASE_PATH)
+    logger.info("Database service initialized")
     
     # Initialize Google Sheets
     await sheets_service.initialize()
     logger.info("Google Sheets service initialized")
-    
-    # Start scheduler
-    scheduler.add_job(
-        check_reminders,
-        trigger=IntervalTrigger(hours=1),
-        id='reminder_check',
-        name='Check reminders every hour',
-        replace_existing=True
-    )
-    scheduler.start()
-    logger.info("Reminder scheduler started")
     
     logger.info("Bot is ready!")
 
@@ -683,7 +431,6 @@ async def on_startup():
 async def on_shutdown():
     """Cleanup on shutdown"""
     logger.info("Shutting down bot...")
-    scheduler.shutdown()
     await bot.session.close()
 
 
