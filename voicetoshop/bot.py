@@ -1112,11 +1112,40 @@ async def handle_add_client(message: Message, processing_msg: Message, transcrip
             )
             logger.info(f"User <TG_ID:{tg_id}> added new client to database")
         else:
-            await processing_msg.edit_text(
-                f"⚠️ Клиент <b>{new_client_data.client_name}</b> уже существует в базе.\n\n"
-                f"Используйте обычное сообщение для обновления информации.",
-                parse_mode=ParseMode.HTML
-            )
+            # If client already exists, update contact info if provided
+            if new_client_data.phone_contact:
+                try:
+                    success_update = await sheets_service.update_client_info(sheet_id, {
+                        'client_name': new_client_data.client_name,
+                        'target_field': 'contacts',
+                        'content_to_append': new_client_data.phone_contact
+                    })
+                    if success_update:
+                        response = (
+                            "📝 <b>Контакт обновлен</b>\n\n"
+                            f"👤 <b>Клиент:</b> {new_client_data.client_name}\n"
+                            f"📱 <b>Телефон:</b> <code>{new_client_data.phone_contact}</code>"
+                        )
+                        await processing_msg.edit_text(
+                            response,
+                            parse_mode=ParseMode.HTML,
+                            reply_markup=get_undo_keyboard()
+                        )
+                    else:
+                        await processing_msg.edit_text(
+                            "❌ Ошибка обновления контакта."
+                        )
+                except Exception as e:
+                    logger.error(f"Error updating existing client contact: {e}")
+                    await processing_msg.edit_text(
+                        "❌ Ошибка обновления контакта."
+                    )
+            else:
+                await processing_msg.edit_text(
+                    f"⚠️ Клиент <b>{new_client_data.client_name}</b> уже существует в базе.\n\n"
+                    f"Добавьте информацию в свободной форме, чтобы я понял, что нужно обновить (например, 'телефон', 'заметки', 'анамнез').",
+                    parse_mode=ParseMode.HTML
+                )
         
     except Exception as e:
         logger.error(f"Error handling add client: {e}")
