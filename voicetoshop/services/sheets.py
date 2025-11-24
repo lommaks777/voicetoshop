@@ -163,6 +163,55 @@ class SheetsService:
             logger.error(f"Failed to ensure worksheets: {e}")
             # Non-critical, will handle in individual operations
     
+    async def _ensure_headers(self, worksheet, expected_headers: list, sheet_name: str):
+        """Ensure worksheet has proper headers in first row (Test 3.3)
+        
+        Args:
+            worksheet: Worksheet object
+            expected_headers: List of expected header names
+            sheet_name: Name of the sheet for logging
+        """
+        try:
+            # Get all values to check first row
+            all_values = await worksheet.get_all_values()
+            
+            if not all_values or len(all_values) == 0:
+                # Completely empty sheet - add headers
+                logger.info(f"Sheet '{sheet_name}': Empty, adding headers")
+                await worksheet.update('A1', [expected_headers])
+                return
+            
+            first_row = all_values[0]
+            
+            # Check if first row is empty
+            if not first_row or all(cell.strip() == '' for cell in first_row):
+                # Empty first row - restore headers
+                logger.warning(f"Sheet '{sheet_name}': First row empty, restoring headers")
+                await worksheet.update('A1', [expected_headers])
+                return
+            
+            # Check if headers match expected
+            headers_match = True
+            for i, expected_header in enumerate(expected_headers):
+                if i >= len(first_row) or first_row[i] != expected_header:
+                    headers_match = False
+                    break
+            
+            if not headers_match:
+                # Headers don't match - check if this is data or corrupted headers
+                # If first row looks like data (has values in expected data columns), insert new row
+                logger.warning(f"Sheet '{sheet_name}': Headers mismatch. Current: {first_row[:5]}, Expected: {expected_headers[:5]}")
+                
+                # For safety, just update the first row if it's clearly wrong
+                # This is a design decision: overwrite vs insert new row
+                # Design doc suggests overwriting for simplicity
+                await worksheet.update('A1', [expected_headers])
+                logger.info(f"Sheet '{sheet_name}': Headers restored")
+                
+        except Exception as e:
+            logger.error(f"Failed to ensure headers for '{sheet_name}': {e}")
+            # Non-critical, continue operation
+    
     async def log_session(self, sheet_id: str, session_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Log a massage session (core operation)
@@ -188,6 +237,10 @@ class SheetsService:
             # Get worksheets
             sessions_ws = await spreadsheet.worksheet(self.SESSIONS_SHEET)
             clients_ws = await spreadsheet.worksheet(self.CLIENTS_SHEET)
+            
+            # Ensure headers are present (Test 3.3)
+            await self._ensure_headers(sessions_ws, ["Date", "Client_Name", "Service_Type", "Duration", "Price", "Session_Notes"], self.SESSIONS_SHEET)
+            await self._ensure_headers(clients_ws, ["Name", "Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"], self.CLIENTS_SHEET)
             
             # Current date
             current_date = datetime.now().strftime('%Y-%m-%d')
@@ -642,6 +695,9 @@ class SheetsService:
             
             # Get Schedule worksheet
             schedule_ws = await spreadsheet.worksheet(self.SCHEDULE_SHEET)
+            
+            # Ensure headers are present (Test 3.3)
+            await self._ensure_headers(schedule_ws, ["Date", "Time", "Client_Name", "Service_Type", "Duration", "Status", "Notes", "Phone_Contact"], self.SCHEDULE_SHEET)
             
             # Check if client exists in Clients worksheet, create if not
             await self._ensure_client_exists(spreadsheet, booking_data)

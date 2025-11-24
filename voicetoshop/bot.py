@@ -318,7 +318,7 @@ async def cmd_set_timezone(message: Message):
         return
     
     city = parts[1].strip()
-    logger.info(f"Updating timezone for city: '{city}'")
+    logger.info(f"Timezone detection started for city: '{city}'")
     
     # Show processing message
     processing_msg = await message.answer("🌍 Определяю часовой пояс...")
@@ -326,8 +326,10 @@ async def cmd_set_timezone(message: Message):
     try:
         # Detect timezone using AI
         timezone = await ai_service.detect_timezone(city)
+        logger.info(f"Timezone detected: {timezone}")
         
         if not timezone:
+            logger.warning(f"Failed to detect timezone for city '{city}'")
             await processing_msg.edit_text(
                 f"❌ Не удалось определить часовой пояс для города '{city}'.\n\n"
                 "Попробуйте указать более крупный город в вашем регионе.",
@@ -335,10 +337,24 @@ async def cmd_set_timezone(message: Message):
             )
             return
         
+        # Validate timezone with pytz
+        try:
+            pytz.timezone(timezone)  # This will raise exception if invalid
+        except Exception as tz_error:
+            logger.error(f"Invalid timezone returned by AI: {timezone} - {tz_error}")
+            await processing_msg.edit_text(
+                f"❌ Неудачная попытка определения часового пояса.\nПопробуйте другой город.",
+                reply_markup=get_main_menu()
+            )
+            return
+        
         # Update timezone in database
+        logger.info(f"Database update initiated for timezone: {timezone}")
         success = await db_service.update_user_timezone(tg_id, timezone)
+        logger.info(f"Database update completed, success: {success}")
         
         if success:
+            logger.info(f"Sending confirmation message for timezone: {timezone}")
             await processing_msg.edit_text(
                 f"✅ <b>Часовой пояс обновлён</b>\n\n"
                 f"🌍 Город: {city}\n"
@@ -349,15 +365,16 @@ async def cmd_set_timezone(message: Message):
             )
             logger.info(f"User <TG_ID:{tg_id}> updated timezone to {timezone}")
         else:
+            logger.error(f"Database update failed for timezone: {timezone}")
             await processing_msg.edit_text(
                 "❌ Ошибка обновления часового пояса. Попробуйте позже.",
                 reply_markup=get_main_menu()
             )
         
     except Exception as e:
-        logger.error(f"Error updating timezone: {e}")
+        logger.error(f"Error updating timezone: {e}", exc_info=True)
         await processing_msg.edit_text(
-            f"❌ Ошибка обновления: {str(e)}",
+            f"❌ Ошибка обновления: {str(e)[:200]}",
             reply_markup=get_main_menu()
         )
 
@@ -821,6 +838,9 @@ async def handle_session(message: Message, processing_msg: Message, transcriptio
 async def handle_client_update(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
     """Handle client information update flow"""
     try:
+        # Enhanced logging for diagnostics (Test 4.2, 4.4)
+        logger.info(f"User <TG_ID:{tg_id}> client update - transcription length: {len(transcription)} chars")
+        
         # Parse client edit data
         client_edit_data = await ai_service.parse_client_edit(transcription)
         
@@ -830,9 +850,45 @@ async def handle_client_update(message: Message, processing_msg: Message, transc
                 "Укажите имя клиента и заметку.",
                 parse_mode=ParseMode.HTML
             )
+            logger.warning(f"User <TG_ID:{tg_id}> client update parsing failed")
             return
         
+        # Validate client name extracted
+        if not client_edit_data.client_name or client_edit_data.client_name.strip() == '':
+            await processing_msg.edit_text(
+                "❌ Не удалось определить имя клиента.\n\n"
+                "Укажите имя явно: 'У [Имя] ...'",
+                parse_mode=ParseMode.HTML
+            )
+            logger.warning(f"User <TG_ID:{tg_id}> client update: client name missing")
+            return
+        
+        # Validate content is not empty
+        if not client_edit_data.content_to_append or client_edit_data.content_to_append.strip() == '':
+            await processing_msg.edit_text(
+                "❌ Не указана информация для добавления.\n\n"
+                "Что записать в заметки?",
+                parse_mode=ParseMode.HTML
+            )
+            logger.warning(f"User <TG_ID:{tg_id}> client update: content empty")
+            return
+        
+        # Check for excessive content length (Test 4.2 - long audio)
+        MAX_CONTENT_LENGTH = 40000  # Google Sheets safe limit
+        if len(client_edit_data.content_to_append) > MAX_CONTENT_LENGTH:
+            truncated_content = client_edit_data.content_to_append[:MAX_CONTENT_LENGTH]
+            logger.warning(f"User <TG_ID:{tg_id}> client update: content truncated from {len(client_edit_data.content_to_append)} to {MAX_CONTENT_LENGTH} chars")
+            client_edit_data.content_to_append = truncated_content
+            # Notify user about truncation
+            await processing_msg.edit_text(
+                "⚠️ Текст заметки слишком длинный.\nСохраняю первые 40000 символов...\n\n"
+                "Пожалуйста, подождите."
+            )
+        
+        logger.info(f"User <TG_ID:{tg_id}> updating client: '{client_edit_data.client_name}' field: {client_edit_data.target_field}")
+        
         # Update client info in sheets
+        try:
             result = await sheets_service.update_client_info(sheet_id, {
                 'client_name': client_edit_data.client_name,
                 'target_field': client_edit_data.target_field,
@@ -843,6 +899,7 @@ async def handle_client_update(message: Message, processing_msg: Message, transc
                 action = result.get('action')
                 if action:
                     await db_service.set_last_action(tg_id, json.dumps(action))
+            
             # Map field names to Russian
             field_names = {
                 'anamnesis': 'Анамнез',
@@ -854,22 +911,36 @@ async def handle_client_update(message: Message, processing_msg: Message, transc
             response = f"📝 <b>Заметка добавлена в карту клиента</b>\n\n"
             response += f"👤 <b>Клиент:</b> {client_edit_data.client_name}\n"
             response += f"📖 <b>Раздел:</b> {field_name}\n\n"
-            response += f"✅ Добавлено: \"{client_edit_data.content_to_append}\""
+            response += f"✅ Добавлено: \"{client_edit_data.content_to_append[:200]}{'...' if len(client_edit_data.content_to_append) > 200 else ''}\""
             
             await processing_msg.edit_text(
                 response, 
                 parse_mode=ParseMode.HTML,
                 reply_markup=get_undo_keyboard()
             )
-            logger.info(f"User <TG_ID:{tg_id}> updated client info")
-        else:
+            logger.info(f"User <TG_ID:{tg_id}> client update successful")
+            
+        except PermissionError:
+            service_email = Config.get_service_account_email()
             await processing_msg.edit_text(
-                "❌ Ошибка обновления информации."
+                f"🚫 <b>Я потерял доступ к вашей таблице</b>\n\n"
+                f"Проверьте, что:\n"
+                f"1. Таблица не удалена\n"
+                f"2. Мой робот имеет доступ Редактора:\n"
+                f"   <code>{service_email}</code>\n\n"
+                f"Если вы удалили доступ, откройте таблицу и снова добавьте меня.",
+                parse_mode=ParseMode.HTML
+            )
+            logger.error(f"User <TG_ID:{tg_id}> client update: permission denied")
+        except Exception as sheet_error:
+            logger.error(f"User <TG_ID:{tg_id}> client update sheet error: {sheet_error}", exc_info=True)
+            await processing_msg.edit_text(
+                f"❌ Ошибка сохранения в таблицу:\n{str(sheet_error)[:200]}"
             )
         
     except Exception as e:
-        logger.error(f"Error handling client update: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обновления информации: {str(e)}")
+        logger.error(f"User <TG_ID:{tg_id}> client update error: {e}", exc_info=True)
+        await processing_msg.edit_text(f"❌ Ошибка обновления информации: {str(e)[:200]}")
 
 
 async def handle_booking(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
@@ -900,7 +971,63 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
             )
             return
         
-        # Add booking to sheets
+        # VALIDATION: Check required fields (Test 2.4)
+        missing_fields = []
+        if not booking_data.client_name or booking_data.client_name.strip().lower() in ['не указано', 'не указан', '']:
+            missing_fields.append("❓ Имя клиента не указано")
+        if not booking_data.date or booking_data.date.strip() == '':
+            missing_fields.append("❓ Дата не определена")
+        if not booking_data.time or booking_data.time.strip() in ['', '00:00']:
+            missing_fields.append("❓ Время записи отсутствует")
+        
+        if missing_fields:
+            await processing_msg.edit_text(
+                "❌ Не хватает информации для создания записи:\n\n" +
+                "\n".join(missing_fields) +
+                "\n\nПожалуйста, укажите все данные.",
+                parse_mode=ParseMode.HTML
+            )
+            logger.warning(f"User <TG_ID:{tg_id}> booking validation failed: missing fields")
+            return
+        
+        # VALIDATION: Verify date validity (Test 2.3)
+        try:
+            booking_date = datetime.strptime(booking_data.date, '%Y-%m-%d').date()
+            user_current_date_obj = datetime.strptime(user_current_date, '%Y-%m-%d').date()
+            
+            # Check if date is in the past
+            if booking_date < user_current_date_obj:
+                await processing_msg.edit_text(
+                    f"❌ Нельзя создать запись на прошедшую дату ({booking_data.date}).\n\n"
+                    f"Укажите будущую дату.",
+                    parse_mode=ParseMode.HTML
+                )
+                logger.warning(f"User <TG_ID:{tg_id}> booking validation failed: past date {booking_data.date}")
+                return
+            
+            # Check if date is too far in future (2 years limit)
+            from datetime import timedelta
+            max_future_date = user_current_date_obj + timedelta(days=730)
+            if booking_date > max_future_date:
+                await processing_msg.edit_text(
+                    f"❌ Дата слишком далеко в будущем ({booking_data.date}).\n\n"
+                    f"Укажите дату в пределах 2 лет.",
+                    parse_mode=ParseMode.HTML
+                )
+                logger.warning(f"User <TG_ID:{tg_id}> booking validation failed: date too far {booking_data.date}")
+                return
+                
+        except ValueError as date_error:
+            # Invalid date format or impossible date (e.g., 32 Dec)
+            await processing_msg.edit_text(
+                f"❌ Дата {booking_data.date} не существует в календаре.\n\n"
+                f"Проверьте день и месяц.",
+                parse_mode=ParseMode.HTML
+            )
+            logger.warning(f"User <TG_ID:{tg_id}> booking validation failed: invalid date {booking_data.date}")
+            return
+        
+        # Validation passed - add booking to sheets
         try:
             action = await sheets_service.add_booking(sheet_id, {
                 'client_name': booking_data.client_name,
@@ -1090,77 +1217,104 @@ async def handle_add_client(message: Message, processing_msg: Message, transcrip
             return
         
         # Add client to sheets
-        result = await sheets_service.add_new_client(sheet_id, {
-            'client_name': new_client_data.client_name,
-            'phone_contact': new_client_data.phone_contact,
-            'notes': new_client_data.notes,
-            'anamnesis': new_client_data.anamnesis
-        })
-        
-        if result.get('success'):
-            action = result.get('action')
-            if action:
-                await db_service.set_last_action(tg_id, json.dumps(action))
-            response = f"✅ <b>Клиент добавлен в базу</b>\n\n"
-            response += f"👤 <b>Имя:</b> {new_client_data.client_name}\n"
+        try:
+            result = await sheets_service.add_new_client(sheet_id, {
+                'client_name': new_client_data.client_name,
+                'phone_contact': new_client_data.phone_contact,
+                'notes': new_client_data.notes,
+                'anamnesis': new_client_data.anamnesis
+            })
             
-            if new_client_data.phone_contact:
-                response += f"📱 <b>Контакт:</b> {new_client_data.phone_contact}\n"
-            
-            if new_client_data.notes:
-                response += f"📝 <b>Предпочтения:</b> {new_client_data.notes}\n"
-            
-            if new_client_data.anamnesis:
-                response += f"🏥 <b>Анамнез:</b> {new_client_data.anamnesis}\n"
-            
-            await processing_msg.edit_text(
-                response, 
-                parse_mode=ParseMode.HTML,
-                reply_markup=get_undo_keyboard()
-            )
-            logger.info(f"User <TG_ID:{tg_id}> added new client to database")
-        else:
-            # If client already exists, update contact info if provided
-            if new_client_data.phone_contact:
-                try:
-                    result_update = await sheets_service.update_client_info(sheet_id, {
-                        'client_name': new_client_data.client_name,
-                        'target_field': 'contacts',
-                        'content_to_append': new_client_data.phone_contact
-                    })
-                    if result_update.get('success'):
-                        action = result_update.get('action')
-                        if action:
-                            await db_service.set_last_action(tg_id, json.dumps(action))
-                        response = (
-                            "📝 <b>Контакт обновлен</b>\n\n"
-                            f"👤 <b>Клиент:</b> {new_client_data.client_name}\n"
-                            f"📱 <b>Телефон:</b> <code>{new_client_data.phone_contact}</code>"
-                        )
-                        await processing_msg.edit_text(
-                            response,
-                            parse_mode=ParseMode.HTML,
-                            reply_markup=get_undo_keyboard()
-                        )
-                    else:
-                        await processing_msg.edit_text(
-                            "❌ Ошибка обновления контакта."
-                        )
-                except Exception as e:
-                    logger.error(f"Error updating existing client contact: {e}")
-                    await processing_msg.edit_text(
-                        "❌ Ошибка обновления контакта."
-                    )
-            else:
+            if result.get('success'):
+                action = result.get('action')
+                if action:
+                    await db_service.set_last_action(tg_id, json.dumps(action))
+                response = f"✅ <b>Клиент добавлен в базу</b>\n\n"
+                response += f"👤 <b>Имя:</b> {new_client_data.client_name}\n"
+                
+                if new_client_data.phone_contact:
+                    response += f"📱 <b>Контакт:</b> {new_client_data.phone_contact}\n"
+                
+                if new_client_data.notes:
+                    response += f"📝 <b>Предпочтения:</b> {new_client_data.notes}\n"
+                
+                if new_client_data.anamnesis:
+                    response += f"🏥 <b>Анамнез:</b> {new_client_data.anamnesis}\n"
+                
                 await processing_msg.edit_text(
-                    f"⚠️ Клиент <b>{new_client_data.client_name}</b> уже существует в базе.\n\n"
-                    f"Добавьте информацию в свободной форме, чтобы я понял, что нужно обновить (например, 'телефон', 'заметки', 'анамнез').",
-                    parse_mode=ParseMode.HTML
+                    response, 
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=get_undo_keyboard()
                 )
+                logger.info(f"User <TG_ID:{tg_id}> added new client to database")
+            else:
+                # If client already exists, update contact info if provided
+                if new_client_data.phone_contact:
+                    try:
+                        result_update = await sheets_service.update_client_info(sheet_id, {
+                            'client_name': new_client_data.client_name,
+                            'target_field': 'contacts',
+                            'content_to_append': new_client_data.phone_contact
+                        })
+                        if result_update.get('success'):
+                            action = result_update.get('action')
+                            if action:
+                                await db_service.set_last_action(tg_id, json.dumps(action))
+                            response = (
+                                "📝 <b>Контакт обновлен</b>\n\n"
+                                f"👤 <b>Клиент:</b> {new_client_data.client_name}\n"
+                                f"📱 <b>Телефон:</b> <code>{new_client_data.phone_contact}</code>"
+                            )
+                            await processing_msg.edit_text(
+                                response,
+                                parse_mode=ParseMode.HTML,
+                                reply_markup=get_undo_keyboard()
+                            )
+                        else:
+                            await processing_msg.edit_text(
+                                "❌ Ошибка обновления контакта."
+                            )
+                    except PermissionError:
+                        service_email = Config.get_service_account_email()
+                        await processing_msg.edit_text(
+                            f"🚫 <b>Я потерял доступ к вашей таблице</b>\n\n"
+                            f"Проверьте, что:\n"
+                            f"1. Таблица не удалена\n"
+                            f"2. Мой робот имеет доступ Редактора:\n"
+                            f"   <code>{service_email}</code>\n\n"
+                            f"Если вы удалили доступ, откройте таблицу и снова добавьте меня.",
+                            parse_mode=ParseMode.HTML
+                        )
+                    except Exception as e:
+                        logger.error(f"Error updating existing client contact: {e}", exc_info=True)
+                        await processing_msg.edit_text(
+                            f"❌ Ошибка: {str(e)[:200]}"
+                        )
+                else:
+                    await processing_msg.edit_text(
+                        f"⚠️ Клиент '{new_client_data.client_name}' уже существует."
+                    )
+        
+        except PermissionError:
+            service_email = Config.get_service_account_email()
+            await processing_msg.edit_text(
+                f"🚫 <b>Я потерял доступ к вашей таблице</b>\n\n"
+                f"Проверьте, что:\n"
+                f"1. Таблица не удалена\n"
+                f"2. Мой робот имеет доступ Редактора:\n"
+                f"   <code>{service_email}</code>\n\n"
+                f"Если вы удалили доступ, откройте таблицу и снова добавьте меня.",
+                parse_mode=ParseMode.HTML
+            )
+        except Exception as e:
+            logger.error(f"Error adding client: {e}", exc_info=True)
+            await processing_msg.edit_text(
+                f"❌ Ошибка добавления клиента: {str(e)[:200]}"
+            )
         
     except Exception as e:
-        logger.error(f"Error handling add client: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка добавления клиента: {str(e)}")
+        logger.error(f"Error handling add client: {e}", exc_info=True)
+        await processing_msg.edit_text(f"❌ Ошибка добавления клиента: {str(e)[:200]}")
 
 
 async def send_morning_briefs():
