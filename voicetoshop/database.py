@@ -65,6 +65,22 @@ class DatabaseService:
             
             await db.commit()
             logger.info("Database schema initialized")
+            
+            # Create user_last_action table for undo feature
+            try:
+                await db.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS user_last_action (
+                        tg_id INTEGER PRIMARY KEY,
+                        action_json TEXT NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY(tg_id) REFERENCES users(tg_id)
+                    )
+                    """
+                )
+                await db.commit()
+            except Exception as e:
+                logger.error(f"Failed to create user_last_action table: {e}")
     
     async def add_user(self, tg_id: int, sheet_id: str) -> bool:
         """
@@ -245,6 +261,43 @@ class DatabaseService:
         except Exception as e:
             logger.error(f"Failed to update timezone for user {tg_id}: {e}")
             return False
+    async def set_last_action(self, tg_id: int, action_json: str) -> None:
+        """Persist user's last action for undo."""
+        try:
+            async with aiosqlite.connect(self.db_path) as db:
+                await db.execute(
+                    "REPLACE INTO user_last_action (tg_id, action_json, created_at) VALUES (?, ?, CURRENT_TIMESTAMP)",
+                    (tg_id, action_json)
+                )
+                await db.commit()
+        except Exception as e:
+            logger.error(f"Failed to set last action for user {tg_id}: {e}")
+    
+    async def get_last_action(self, tg_id: int) -> Optional[str]:
+        """Get user's last action JSON string."""
+        try:
+            async with aiosqlite.connect(self.db_path) as db:
+                async with db.execute(
+                    "SELECT action_json FROM user_last_action WHERE tg_id = ?",
+                    (tg_id,)
+                ) as cursor:
+                    row = await cursor.fetchone()
+                    return row[0] if row else None
+        except Exception as e:
+            logger.error(f"Failed to get last action for user {tg_id}: {e}")
+            return None
+    
+    async def clear_last_action(self, tg_id: int) -> None:
+        """Clear user's last action after undo."""
+        try:
+            async with aiosqlite.connect(self.db_path) as db:
+                await db.execute(
+                    "DELETE FROM user_last_action WHERE tg_id = ?",
+                    (tg_id,)
+                )
+                await db.commit()
+        except Exception as e:
+            logger.error(f"Failed to clear last action for user {tg_id}: {e}")
 
 
 # Global instance

@@ -163,7 +163,7 @@ class SheetsService:
             logger.error(f"Failed to ensure worksheets: {e}")
             # Non-critical, will handle in individual operations
     
-    async def log_session(self, sheet_id: str, session_data: Dict[str, Any]) -> None:
+    async def log_session(self, sheet_id: str, session_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Log a massage session (core operation)
         
@@ -211,6 +211,13 @@ class SheetsService:
             await sessions_ws.update(range_name=f"A{next_row}", values=[session_row])
             logger.info(f"Logged session for client: {session_data['client_name']}")
             
+            action_meta = {
+                'type': 'session',
+                'sheet': self.SESSIONS_SHEET,
+                'row_index': next_row,
+                'range': f"A{next_row}:F{next_row}"
+            }
+            
             # 2. Upsert client in Clients tab
             await self._upsert_client(
                 clients_ws=clients_ws,
@@ -229,6 +236,8 @@ class SheetsService:
         except Exception as e:
             logger.error(f"Failed to log session: {e}")
             raise
+        
+        return action_meta
     
     async def _upsert_client(
         self,
@@ -609,7 +618,7 @@ class SheetsService:
             # Non-critical error, continue with booking anyway
             pass
     
-    async def add_booking(self, sheet_id: str, booking_data: Dict[str, Any]) -> None:
+    async def add_booking(self, sheet_id: str, booking_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Add a future appointment to the Schedule worksheet
         Also creates client card in Clients worksheet if client doesn't exist
@@ -657,14 +666,23 @@ class SheetsService:
             await schedule_ws.update(range_name=f"A{next_row}", values=[booking_row])
             logger.info(f"Added booking for {booking_data['client_name']} on {booking_data['date']} at {booking_data['time']}")
             
+            action_meta = {
+                'type': 'booking',
+                'sheet': self.SCHEDULE_SHEET,
+                'row_index': next_row,
+                'range': f"A{next_row}:H{next_row}"
+            }
+            
         except PermissionError:
             logger.error(f"Permission denied for sheet {sheet_id}")
             raise
         except Exception as e:
             logger.error(f"Failed to add booking: {e}")
             raise
+        
+        return action_meta
     
-    async def update_client_info(self, sheet_id: str, edit_data: Dict[str, Any]) -> bool:
+    async def update_client_info(self, sheet_id: str, edit_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Update client information by appending to existing data
         
@@ -757,7 +775,14 @@ class SheetsService:
                 # Update the specific cell
                 await clients_ws.update(f'{col_letter}{existing_row_index}', [[updated_value]])
                 logger.info(f"Updated {column_name} for existing client: {client_name}")
-                
+                action_meta = {
+                    'type': 'client_update',
+                    'sheet': self.CLIENTS_SHEET,
+                    'row_index': existing_row_index,
+                    'col_letter': col_letter,
+                    'old_value': current_value,
+                    'new_value': updated_value
+                }
             else:
                 # Create new client with the information
                 new_row = [''] * len(headers)
@@ -771,17 +796,25 @@ class SheetsService:
                 
                 await clients_ws.append_row(new_row)
                 logger.info(f"Created new client: {client_name} with {column_name}")
+                # Calculate new row index
+                new_index = len(all_values) + 1
+                action_meta = {
+                    'type': 'new_client',
+                    'sheet': self.CLIENTS_SHEET,
+                    'row_index': new_index,
+                    'range': f"A{new_index}:G{new_index}"
+                }
             
-            return True
+            return {'success': True, 'action': action_meta}
             
         except PermissionError:
             logger.error(f"Permission denied for sheet {sheet_id}")
             raise
         except Exception as e:
             logger.error(f"Failed to update client info: {e}")
-            return False
+            return {'success': False}
     
-    async def add_new_client(self, sheet_id: str, client_data: Dict[str, Any]) -> bool:
+    async def add_new_client(self, sheet_id: str, client_data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Add a new client to the database without a session
         
@@ -828,7 +861,7 @@ class SheetsService:
             if existing_client:
                 # Client already exists
                 logger.warning(f"Client {client_name} already exists")
-                return False
+                return {'success': False, 'error': 'exists'}
             
             # Create new client row
             new_row = [
@@ -843,27 +876,59 @@ class SheetsService:
             
             await clients_ws.append_row(new_row)
             logger.info(f"Created new client: {client_name}")
-            
-            return True
+            # Calculate new row index
+            new_index = len(all_values)
+            return {'success': True, 'action': {'type': 'new_client', 'sheet': self.CLIENTS_SHEET, 'row_index': new_index, 'range': f"A{new_index}:G{new_index}"}}
             
         except PermissionError:
             logger.error(f"Permission denied for sheet {sheet_id}")
             raise
         except Exception as e:
             logger.error(f"Failed to add new client: {e}")
-            return False
+            return {'success': False, 'error': str(e)}
     
-    async def get_daily_schedule(self, sheet_id: str, target_date: str) -> List[Dict[str, Any]]:
-        """
-        Get appointments for a specific date from Schedule worksheet
-        
-        Args:
-            sheet_id: User's Google Sheet ID
-            target_date: Date in YYYY-MM-DD format
+    async def undo_last_action(self, sheet_id: str, action: Dict[str, Any]) -> bool:
+        """Undo last action based on stored metadata."""
+        try:
+            spreadsheet = await self._get_spreadsheet(sheet_id)
+            action_type = action.get('type')
+            sheet_name = action.get('sheet')
+            row_index = action.get('row_index')
             
-        Returns:
-            List of appointment dictionaries sorted by time
-        """
+            ws = await spreadsheet.worksheet(sheet_name)
+            
+            if action_type in ['session', 'booking', 'new_client']:
+                # Prefer to delete the row entirely
+                if not row_index:
+                    return False
+                try:
+                    await ws.delete_rows(row_index)
+                except Exception:
+                    # Fallback: clear the known range
+                    rng = action.get('range')
+                    if not rng:
+                        return False
+                    # Try to determine width from headers
+                    all_values = await ws.get_all_values()
+                    headers = all_values[0] if all_values else []
+                    width = len(headers) if headers else 8
+                    await ws.update(rng, [[""] * width])
+                return True
+            elif action_type == 'client_update':
+                col_letter = action.get('col_letter')
+                old_value = action.get('old_value', '')
+                if not col_letter or not row_index:
+                    return False
+                await ws.update(f"{col_letter}{row_index}", [[old_value]])
+                return True
+            else:
+                return False
+        except Exception as e:
+            logger.error(f"Failed to undo last action: {e}")
+            return False
+
+    async def get_daily_schedule(self, sheet_id: str, target_date: str) -> List[Dict[str, Any]]:
+        """Get appointments for a specific date from Schedule."""
         try:
             spreadsheet = await self._get_spreadsheet(sheet_id)
             

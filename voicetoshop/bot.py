@@ -3,6 +3,7 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
+import json
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
@@ -55,7 +56,7 @@ def get_undo_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardMarkup with help button
     """
     keyboard = [
-        [InlineKeyboardButton(text="❌ Отменить действие", callback_data="show_undo_help")]
+        [InlineKeyboardButton(text="❌ Отменить действие", callback_data="undo_last")]
     ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
@@ -498,42 +499,41 @@ async def menu_help(message: Message):
     )
 
 
-@dp.callback_query(F.data == "show_undo_help")
-async def handle_undo_help(callback: CallbackQuery):
-    """Handle undo help button click"""
+@dp.callback_query(F.data == "undo_last")
+async def handle_undo_last(callback: CallbackQuery):
+    """Handle undo last action click"""
     tg_id = callback.from_user.id
-    logger.info(f"User <TG_ID:{tg_id}> requested undo help")
+    logger.info(f"User <TG_ID:{tg_id}> requested undo")
     
-    # Get user's sheet link
+    # Get user context
     context = await get_user_context(tg_id)
     if not context:
         await callback.answer("Пожалуйста, зарегистрируйтесь")
         return
     
     sheet_id = context['sheet_id']
-    sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
+    last_action_json = await db_service.get_last_action(tg_id)
+    if not last_action_json:
+        await callback.answer("Нет действия для отмены", show_alert=True)
+        return
     
-    help_message = (
-        "❌ <b>Как отменить действие:</b>\n\n"
-        "Чтобы удалить или исправить запись:\n\n"
-        f"1️⃣ Откройте вашу <a href='{sheet_url}'>таблицу Google Sheets</a>\n\n"
-        "2️⃣ Найдите нужную вкладку:\n"
-        "   • <b>Sessions</b> - для сеансов\n"
-        "   • <b>Schedule</b> - для записей\n"
-        "   • <b>Clients</b> - для информации о клиентах\n\n"
-        "3️⃣ Найдите нужную строку и:\n"
-        "   • Удалите её (ПКМ по номеру строки → Удалить)\n"
-        "   • Или исправьте данные вручную\n\n"
-        "💡 Все изменения сохраняются автоматически!"
-    )
+    # Parse and perform undo
+    try:
+        action = json.loads(last_action_json)
+    except Exception:
+        await callback.answer("Данные для отмены повреждены", show_alert=True)
+        return
     
-    # Answer callback and send help message
-    await callback.answer()
-    await callback.message.answer(
-        help_message,
-        parse_mode=ParseMode.HTML,
-        disable_web_page_preview=True
-    )
+    ok = await sheets_service.undo_last_action(sheet_id, action)
+    if ok:
+        await db_service.clear_last_action(tg_id)
+        await callback.answer("✅ Последнее действие отменено")
+        try:
+            await callback.message.edit_reply_markup(reply_markup=None)
+        except Exception:
+            pass
+    else:
+        await callback.answer("❌ Не удалось отменить", show_alert=True)
 
 
 @dp.message(F.text)
@@ -763,7 +763,7 @@ async def handle_session(message: Message, processing_msg: Message, transcriptio
         
         # Log session to Google Sheets
         try:
-            await sheets_service.log_session(sheet_id, {
+            action = await sheets_service.log_session(sheet_id, {
                 'client_name': session_data.client_name,
                 'service_name': session_data.service_name,
                 'price': session_data.price,
@@ -773,6 +773,7 @@ async def handle_session(message: Message, processing_msg: Message, transcriptio
                 'preference_notes': session_data.preference_notes,
                 'next_appointment_date': session_data.next_appointment_date
             })
+            await db_service.set_last_action(tg_id, json.dumps(action))
             
             # Privacy-compliant logging
             logger.info(f"User <TG_ID:{tg_id}> logged a session")
@@ -832,13 +833,16 @@ async def handle_client_update(message: Message, processing_msg: Message, transc
             return
         
         # Update client info in sheets
-        success = await sheets_service.update_client_info(sheet_id, {
-            'client_name': client_edit_data.client_name,
-            'target_field': client_edit_data.target_field,
-            'content_to_append': client_edit_data.content_to_append
-        })
-        
-        if success:
+            result = await sheets_service.update_client_info(sheet_id, {
+                'client_name': client_edit_data.client_name,
+                'target_field': client_edit_data.target_field,
+                'content_to_append': client_edit_data.content_to_append
+            })
+            
+            if result.get('success'):
+                action = result.get('action')
+                if action:
+                    await db_service.set_last_action(tg_id, json.dumps(action))
             # Map field names to Russian
             field_names = {
                 'anamnesis': 'Анамнез',
@@ -898,7 +902,7 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
         
         # Add booking to sheets
         try:
-            await sheets_service.add_booking(sheet_id, {
+            action = await sheets_service.add_booking(sheet_id, {
                 'client_name': booking_data.client_name,
                 'date': booking_data.date,
                 'time': booking_data.time,
@@ -907,6 +911,7 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
                 'notes': booking_data.notes,
                 'phone_contact': booking_data.phone_contact
             })
+            await db_service.set_last_action(tg_id, json.dumps(action))
             
             # Privacy-compliant logging
             logger.info(f"User <TG_ID:{tg_id}> created a booking")
@@ -1085,14 +1090,17 @@ async def handle_add_client(message: Message, processing_msg: Message, transcrip
             return
         
         # Add client to sheets
-        success = await sheets_service.add_new_client(sheet_id, {
+        result = await sheets_service.add_new_client(sheet_id, {
             'client_name': new_client_data.client_name,
             'phone_contact': new_client_data.phone_contact,
             'notes': new_client_data.notes,
             'anamnesis': new_client_data.anamnesis
         })
         
-        if success:
+        if result.get('success'):
+            action = result.get('action')
+            if action:
+                await db_service.set_last_action(tg_id, json.dumps(action))
             response = f"✅ <b>Клиент добавлен в базу</b>\n\n"
             response += f"👤 <b>Имя:</b> {new_client_data.client_name}\n"
             
@@ -1115,12 +1123,15 @@ async def handle_add_client(message: Message, processing_msg: Message, transcrip
             # If client already exists, update contact info if provided
             if new_client_data.phone_contact:
                 try:
-                    success_update = await sheets_service.update_client_info(sheet_id, {
+                    result_update = await sheets_service.update_client_info(sheet_id, {
                         'client_name': new_client_data.client_name,
                         'target_field': 'contacts',
                         'content_to_append': new_client_data.phone_contact
                     })
-                    if success_update:
+                    if result_update.get('success'):
+                        action = result_update.get('action')
+                        if action:
+                            await db_service.set_last_action(tg_id, json.dumps(action))
                         response = (
                             "📝 <b>Контакт обновлен</b>\n\n"
                             f"👤 <b>Клиент:</b> {new_client_data.client_name}\n"
