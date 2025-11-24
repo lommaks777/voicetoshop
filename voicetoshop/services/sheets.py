@@ -741,11 +741,14 @@ class SheetsService:
                 # Update existing client
                 current_value = existing_data.get(column_name, '').strip()
                 
-                # Append with timestamp
-                if current_value:
-                    updated_value = f"{current_value}\n({current_date_short}): {content}"
+                # Append with timestamp (except Contact)
+                if column_name == 'Contact':
+                    updated_value = content.strip()
                 else:
-                    updated_value = f"({current_date_short}): {content}"
+                    if current_value:
+                        updated_value = f"{current_value}\n({current_date_short}): {content}"
+                    else:
+                        updated_value = f"({current_date_short}): {content}"
                 
                 # Find column index
                 col_index = headers.index(column_name)
@@ -761,7 +764,10 @@ class SheetsService:
                 new_row[headers.index('Name')] = client_name
                 
                 # Set the target field
-                new_row[headers.index(column_name)] = f"({current_date_short}): {content}"
+                if column_name == 'Contact':
+                    new_row[headers.index(column_name)] = content.strip()
+                else:
+                    new_row[headers.index(column_name)] = f"({current_date_short}): {content}"
                 
                 await clients_ws.append_row(new_row)
                 logger.info(f"Created new client: {client_name} with {column_name}")
