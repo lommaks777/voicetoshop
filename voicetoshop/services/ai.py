@@ -49,6 +49,14 @@ class ClientEditData(BaseModel):
     content_to_append: str = Field(description="Content to append to the client record")
 
 
+class NewClientData(BaseModel):
+    """New client registration data"""
+    client_name: str = Field(description="Client full name")
+    phone_contact: Optional[str] = Field(default=None, description="Phone number or contact info")
+    notes: Optional[str] = Field(default=None, description="Preferences, likes, general notes about client")
+    anamnesis: Optional[str] = Field(default=None, description="Medical information, health conditions, contraindications")
+
+
 class BookingData(BaseModel):
     """Future booking/appointment data"""
     client_name: str = Field(description="Client full name")
@@ -217,11 +225,11 @@ Respond with ONLY the timezone identifier."""
     
     @staticmethod
     async def classify_message(text: str) -> str:
-        """
-        Classify if message is about Session, Client Edit, Booking, or Query
+        """  
+        Classify if message is about Session, Client Edit, Booking, Query, or Add New Client
         
         Returns:
-            "log_session", "client_update", "consultation", "booking", "client_query", or "add_service"
+            "log_session", "client_update", "consultation", "booking", "client_query", "add_service", or "add_client"
         """
         try:
             # Get current date context for classification
@@ -253,7 +261,11 @@ Classify into ONE of these categories:
   Examples: "Кто такая Анна?", "Что у Ивана с спиной?", "Напомни про Ольгу"
   Indicators: questions ("кто", "что", "когда"), information requests
 
-- CLIENT_UPDATE: Adding notes about client WITHOUT session/payment details
+- ADD_CLIENT: Adding a NEW client to database with contact info and preferences
+  Examples: "Запиши клиента в контакты", "Добавь нового клиента", "Создай карту клиента"
+  Indicators: explicit request to add/create client, includes name + contact info, no session details
+
+- CLIENT_UPDATE: Adding notes about EXISTING client WITHOUT session/payment details
   Examples: "У Ольги аллергия на мёд", "Иван просил пожестче"
   Indicators: declarative statements about client attributes, no session/payment context
 
@@ -269,9 +281,10 @@ Key distinctions:
 - Past tense + payment = LOG_SESSION
 - Future time + scheduling = BOOKING
 - Question about client = CLIENT_QUERY
-- Statement about client preferences/attributes = CLIENT_UPDATE
+- "Add client"/"new client" + contact info = ADD_CLIENT
+- Statement about existing client = CLIENT_UPDATE
 
-Respond with only one word: "log_session", "booking", "client_query", "client_update", "consultation", or "add_service"."""
+Respond with only one word: "log_session", "booking", "client_query", "add_client", "client_update", "consultation", or "add_service"."""
                     },
                     {
                         "role": "user",
@@ -284,7 +297,7 @@ Respond with only one word: "log_session", "booking", "client_query", "client_up
             classification = response.choices[0].message.content.strip().lower()
             logger.info(f"Message classified as: {classification}")
             
-            valid_intents = ["log_session", "client_update", "consultation", "add_service", "booking", "client_query"]
+            valid_intents = ["log_session", "client_update", "consultation", "add_service", "booking", "client_query", "add_client"]
             return classification if classification in valid_intents else "log_session"
             
         except Exception as e:
@@ -758,6 +771,84 @@ Return data in the specified JSON format."""
             
         except Exception as e:
             logger.error(f"Client query parsing failed: {e}")
+            return None
+    
+    @staticmethod
+    async def parse_new_client(text: str) -> Optional[NewClientData]:
+        """
+        Parse new client registration information from transcribed text
+        
+        Args:
+            text: Transcribed text
+            
+        Returns:
+            NewClientData object or None if parsing failed
+        """
+        try:
+            response = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """You are a CRM assistant extracting NEW client registration information.
+
+Extract:
+1. client_name: Full client name (capitalize properly)
+2. phone_contact: Phone number or other contact info (Telegram, Instagram, WhatsApp, etc.)
+   - Normalize phone: convert spoken numbers to digits
+   - "плюс семь один два три" → "+7123..."
+   - Keep @ for Telegram/Instagram handles
+3. notes: Client preferences, what they like, general information
+   - Examples: "Любит массаж лица", "предпочитает утро"
+4. anamnesis: Medical information, health conditions, contraindications
+   - Examples: "аллергия на мёд", "остеохондроз"
+
+IMPORTANT:
+- Separate medical info (anamnesis) from preferences (notes)
+- Convert spoken phone numbers to digits
+- Extract ALL provided information
+
+Examples:
+"Запиши клиента. Имя Полина, телефон +7-123-456-78-90. Любит массаж лица."
+→ client_name: "Полина", phone_contact: "+7-123-456-78-90", notes: "Любит массаж лица", anamnesis: null
+
+"Добавь новую клиентку Анна, Instagram @anna_k, аллергия на масла"
+→ client_name: "Анна", phone_contact: "Instagram @anna_k", notes: null, anamnesis: "Аллергия на масла"
+
+Return data in the specified JSON format."""
+                    },
+                    {
+                        "role": "user",
+                        "content": text
+                    }
+                ],
+                response_format={"type": "json_schema", "json_schema": {
+                    "name": "new_client_data",
+                    "strict": True,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "client_name": {"type": "string"},
+                            "phone_contact": {"type": ["string", "null"]},
+                            "notes": {"type": ["string", "null"]},
+                            "anamnesis": {"type": ["string", "null"]}
+                        },
+                        "required": ["client_name", "phone_contact", "notes", "anamnesis"],
+                        "additionalProperties": False
+                    }
+                }},
+                temperature=0
+            )
+            
+            import json
+            result = json.loads(response.choices[0].message.content)
+            new_client_data = NewClientData(**result)
+            
+            logger.info(f"Parsed new client: {new_client_data.client_name}")
+            return new_client_data
+            
+        except Exception as e:
+            logger.error(f"New client parsing failed: {e}")
             return None
     
     @staticmethod

@@ -105,6 +105,8 @@ async def process_text_input(message: Message, text: str, processing_msg: Messag
             await handle_booking(message, processing_msg, text, sheet_id, tg_id)
         elif message_type == "client_query":
             await handle_client_query(message, processing_msg, text, sheet_id, tg_id)
+        elif message_type == "add_client":
+            await handle_add_client(message, processing_msg, text, sheet_id, tg_id)
         elif message_type == "consultation":
             await processing_msg.edit_text(
                 "Для просмотра информации о клиенте используйте команду:\n"
@@ -1058,6 +1060,59 @@ async def handle_client_query(message: Message, processing_msg: Message, transcr
     except Exception as e:
         logger.error(f"Error handling client query: {e}")
         await processing_msg.edit_text(f"❌ Ошибка получения данных: {str(e)}")
+
+
+async def handle_add_client(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
+    """Handle new client registration flow"""
+    try:
+        # Parse new client data
+        new_client_data = await ai_service.parse_new_client(transcription)
+        
+        if not new_client_data:
+            await processing_msg.edit_text(
+                "❌ Не удалось извлечь информацию о клиенте.\n\n"
+                "Укажите хотя бы имя клиента.",
+                parse_mode=ParseMode.HTML
+            )
+            return
+        
+        # Add client to sheets
+        success = await sheets_service.add_new_client(sheet_id, {
+            'client_name': new_client_data.client_name,
+            'phone_contact': new_client_data.phone_contact,
+            'notes': new_client_data.notes,
+            'anamnesis': new_client_data.anamnesis
+        })
+        
+        if success:
+            response = f"✅ <b>Клиент добавлен в базу</b>\n\n"
+            response += f"👤 <b>Имя:</b> {new_client_data.client_name}\n"
+            
+            if new_client_data.phone_contact:
+                response += f"📱 <b>Контакт:</b> {new_client_data.phone_contact}\n"
+            
+            if new_client_data.notes:
+                response += f"📝 <b>Предпочтения:</b> {new_client_data.notes}\n"
+            
+            if new_client_data.anamnesis:
+                response += f"🏥 <b>Анамнез:</b> {new_client_data.anamnesis}\n"
+            
+            await processing_msg.edit_text(
+                response, 
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_undo_keyboard()
+            )
+            logger.info(f"User <TG_ID:{tg_id}> added new client to database")
+        else:
+            await processing_msg.edit_text(
+                f"⚠️ Клиент <b>{new_client_data.client_name}</b> уже существует в базе.\n\n"
+                f"Используйте обычное сообщение для обновления информации.",
+                parse_mode=ParseMode.HTML
+            )
+        
+    except Exception as e:
+        logger.error(f"Error handling add client: {e}")
+        await processing_msg.edit_text(f"❌ Ошибка добавления клиента: {str(e)}")
 
 
 async def send_morning_briefs():

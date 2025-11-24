@@ -716,6 +716,78 @@ class SheetsService:
             logger.error(f"Failed to update client info: {e}")
             return False
     
+    async def add_new_client(self, sheet_id: str, client_data: Dict[str, Any]) -> bool:
+        """
+        Add a new client to the database without a session
+        
+        Args:
+            sheet_id: User's Google Sheet ID
+            client_data: Dict with keys:
+                - client_name (str)
+                - phone_contact (str, optional)
+                - notes (str, optional)
+                - anamnesis (str, optional)
+                
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            spreadsheet = await self._get_spreadsheet(sheet_id)
+            
+            # Ensure worksheets exist
+            await self._ensure_worksheets(sheet_id)
+            
+            clients_ws = await spreadsheet.worksheet(self.CLIENTS_SHEET)
+            all_values = await clients_ws.get_all_values()
+            
+            if not all_values or len(all_values) < 1:
+                # No data, create header
+                headers = ["Name", "Phone_Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"]
+                await clients_ws.update('A1', [headers])
+                all_values = [headers]
+            
+            headers = all_values[0]
+            client_name = client_data['client_name']
+            
+            # Check if client already exists
+            existing_client = None
+            for row_data in all_values[1:]:
+                while len(row_data) < len(headers):
+                    row_data.append('')
+                
+                record = dict(zip(headers, row_data))
+                if record.get('Name', '').strip().lower() == client_name.strip().lower():
+                    existing_client = record.get('Name', '').strip()
+                    break
+            
+            if existing_client:
+                # Client already exists
+                logger.warning(f"Client {client_name} already exists")
+                return False
+            
+            # Create new client row
+            new_row = [
+                client_name,
+                client_data.get('phone_contact', ''),
+                client_data.get('anamnesis', ''),
+                client_data.get('notes', ''),
+                0,  # LTV starts at 0
+                '',  # Last_Visit_Date empty
+                ''   # Next_Reminder empty
+            ]
+            
+            await clients_ws.append_row(new_row)
+            logger.info(f"Created new client: {client_name}")
+            
+            return True
+            
+        except PermissionError:
+            logger.error(f"Permission denied for sheet {sheet_id}")
+            raise
+        except Exception as e:
+            logger.error(f"Failed to add new client: {e}")
+            return False
+    
     async def get_daily_schedule(self, sheet_id: str, target_date: str) -> List[Dict[str, Any]]:
         """
         Get appointments for a specific date from Schedule worksheet
