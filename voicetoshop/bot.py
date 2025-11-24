@@ -904,7 +904,8 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
                 'time': booking_data.time,
                 'service_name': booking_data.service_name,
                 'duration': booking_data.duration,
-                'notes': booking_data.notes
+                'notes': booking_data.notes,
+                'phone_contact': booking_data.phone_contact
             })
             
             # Privacy-compliant logging
@@ -936,6 +937,9 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
                 response += f" ({weekday})"
             response += f" в {booking_data.time}\n"
             response += f"👤 <b>Клиент:</b> {booking_data.client_name}\n"
+            
+            if booking_data.phone_contact:
+                response += f"📱 <b>Телефон:</b> <code>{booking_data.phone_contact}</code>\n"
             
             if booking_data.service_name:
                 response += f"💆‍♀️ <b>Услуга:</b> {booking_data.service_name}\n"
@@ -1001,10 +1005,12 @@ async def handle_client_query(message: Message, processing_msg: Message, transcr
         # Format response - phone contact first for easy copying
         response = f"👤 <b>{client_info['name']}</b>\n"
         
-        if client_info.get('phone_contact'):
-            response += f"📱 <code>{client_info['phone_contact']}</code>\n\n"
+        # Always show phone field
+        phone = client_info.get('phone_contact', '').strip()
+        if phone:
+            response += f"📱 <code>{phone}</code>\n\n"
         else:
-            response += "\n"
+            response += f"📱 Телефон не указан\n\n"
         
         if client_info.get('anamnesis'):
             response += f"🏥 <b>Анамнез:</b>\n{client_info['anamnesis']}\n\n"

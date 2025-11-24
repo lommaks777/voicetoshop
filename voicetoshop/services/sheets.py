@@ -150,7 +150,7 @@ class SheetsService:
                 self.CLIENTS_SHEET: ["Name", "Phone_Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"],
                 self.SESSIONS_SHEET: ["Date", "Client_Name", "Service_Type", "Duration", "Price", "Session_Notes"],
                 self.SERVICES_SHEET: ["Service_Name", "Default_Price", "Default_Duration"],
-                self.SCHEDULE_SHEET: ["Date", "Time", "Client_Name", "Service_Type", "Duration", "Status", "Notes"]
+                self.SCHEDULE_SHEET: ["Date", "Time", "Client_Name", "Service_Type", "Duration", "Status", "Notes", "Phone_Contact"]
             }
             
             for sheet_name, header_row in headers.items():
@@ -569,6 +569,7 @@ class SheetsService:
                 - service_name (str, optional)
                 - duration (int, optional)
                 - notes (str, optional)
+                - phone_contact (str, optional)
         """
         try:
             spreadsheet = await self._get_spreadsheet(sheet_id)
@@ -587,7 +588,8 @@ class SheetsService:
                 str(booking_data.get('service_name') or 'Не указано'),
                 str(booking_data.get('duration', '')),
                 'Confirmed',
-                str(booking_data.get('notes', ''))
+                str(booking_data.get('notes', '')),
+                str(booking_data.get('phone_contact', ''))
             ]
             
             # Get all values to calculate next row position

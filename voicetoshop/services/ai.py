@@ -65,6 +65,7 @@ class BookingData(BaseModel):
     service_name: Optional[str] = Field(default=None, description="Type of service")
     duration: Optional[int] = Field(default=None, description="Duration in minutes", gt=0)
     notes: Optional[str] = Field(default=None, description="Special instructions or notes")
+    phone_contact: Optional[str] = Field(default=None, description="Phone number or contact info")
 
 
 class ClientQueryData(BaseModel):
@@ -669,11 +670,17 @@ Extract:
 4. service_name: Type of massage/service (optional)
 5. duration: Duration in minutes (optional)
 6. notes: Special instructions (optional)
+7. phone_contact: Client's phone number (optional)
+   - CRITICAL: Convert spoken numbers to digits
+   - "плюс семь девять девять девять" → "+7999"
+   - "восемь девятьсот пять" → "8905"
+   - "ноль" / "нолик" → "0"
 
 Examples:
 - "Запиши Ольгу на завтра в 14:00" → date: tomorrow's date, time: "14:00"
 - "Book Mike for Tuesday 10 AM" → date: next Tuesday, time: "10:00"
 - "Добавь Анну в пятницу в 15:30, массаж лица" → date: next Friday, time: "15:30", service: "Массаж лица"
+- "Запиши Марию на понедельник в 10:00, телефон плюс семь девять ноль ноль" → date: next Monday, time: "10:00", phone_contact: "+7900"
 
 Return data in the specified JSON format."""
                     },
@@ -693,9 +700,10 @@ Return data in the specified JSON format."""
                             "time": {"type": "string"},
                             "service_name": {"type": ["string", "null"]},
                             "duration": {"type": ["integer", "null"]},
-                            "notes": {"type": ["string", "null"]}
+                            "notes": {"type": ["string", "null"]},
+                            "phone_contact": {"type": ["string", "null"]}
                         },
-                        "required": ["client_name", "date", "time", "service_name", "duration", "notes"],
+                        "required": ["client_name", "date", "time", "service_name", "duration", "notes", "phone_contact"],
                         "additionalProperties": False
                     }
                 }},
