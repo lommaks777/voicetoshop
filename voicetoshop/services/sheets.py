@@ -147,7 +147,7 @@ class SheetsService:
             worksheet_names = [ws.title for ws in worksheets]
             
             headers = {
-                self.CLIENTS_SHEET: ["Name", "Phone_Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"],
+                self.CLIENTS_SHEET: ["Name", "Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"],
                 self.SESSIONS_SHEET: ["Date", "Client_Name", "Service_Type", "Duration", "Price", "Session_Notes"],
                 self.SERVICES_SHEET: ["Service_Name", "Default_Price", "Default_Duration"],
                 self.SCHEDULE_SHEET: ["Date", "Time", "Client_Name", "Service_Type", "Duration", "Status", "Notes", "Phone_Contact"]
@@ -248,7 +248,7 @@ class SheetsService:
             
             if not all_values or len(all_values) < 1:
                 # No data, create header
-                headers = ["Name", "Phone_Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"]
+                headers = ["Name", "Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"]
                 await clients_ws.update('A1', [headers])
                 all_values = [headers]
             
@@ -299,7 +299,7 @@ class SheetsService:
                 # Update row
                 updated_row = [
                     client_name,
-                    existing_data.get('Phone_Contact', ''),
+                    existing_data.get('Contact', ''),
                     updated_anamnesis,
                     updated_notes,
                     updated_ltv,
@@ -513,7 +513,7 @@ class SheetsService:
             # Phase 5: Return result with ambiguity metadata and future bookings
             return {
                 'name': selected_record.get('Name', ''),
-                'phone_contact': selected_record.get('Phone_Contact', ''),
+                'phone_contact': selected_record.get('Contact', ''),
                 'anamnesis': selected_record.get('Anamnesis', ''),
                 'notes': selected_record.get('Notes', ''),
                 'ltv': selected_record.get('LTV', ''),
@@ -570,7 +570,7 @@ class SheetsService:
             
             if not all_values or len(all_values) < 1:
                 # No data, create header
-                headers = ["Name", "Phone_Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"]
+                headers = ["Name", "Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"]
                 await clients_ws.update('A1', [headers])
                 all_values = [headers]
             
@@ -689,7 +689,7 @@ class SheetsService:
             
             if not all_values or len(all_values) < 1:
                 # No data, create header and new client
-                headers = ["Name", "Phone_Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"]
+                headers = ["Name", "Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"]
                 await clients_ws.update('A1', [headers])
                 all_values = [headers]
             
@@ -702,7 +702,7 @@ class SheetsService:
             field_mapping = {
                 'anamnesis': 'Anamnesis',
                 'notes': 'Notes',
-                'contacts': 'Phone_Contact'
+                'contacts': 'Contact'
             }
             
             if target_field not in field_mapping:
@@ -801,7 +801,7 @@ class SheetsService:
             
             if not all_values or len(all_values) < 1:
                 # No data, create header
-                headers = ["Name", "Phone_Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"]
+                headers = ["Name", "Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"]
                 await clients_ws.update('A1', [headers])
                 all_values = [headers]
             
