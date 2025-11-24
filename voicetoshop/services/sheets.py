@@ -556,9 +556,63 @@ class SheetsService:
             logger.error(f"Failed to get services: {e}")
             return []
     
+    async def _ensure_client_exists(self, spreadsheet, booking_data: Dict[str, Any]) -> None:
+        """
+        Check if client exists in Clients worksheet, create if not
+        
+        Args:
+            spreadsheet: Google Spreadsheet object
+            booking_data: Booking data containing client_name and phone_contact
+        """
+        try:
+            clients_ws = await spreadsheet.worksheet(self.CLIENTS_SHEET)
+            all_values = await clients_ws.get_all_values()
+            
+            if not all_values or len(all_values) < 1:
+                # No data, create header
+                headers = ["Name", "Phone_Contact", "Anamnesis", "Notes", "LTV", "Last_Visit_Date", "Next_Reminder"]
+                await clients_ws.update('A1', [headers])
+                all_values = [headers]
+            
+            headers = all_values[0]
+            client_name = booking_data['client_name']
+            phone_contact = booking_data.get('phone_contact', '')
+            
+            # Check if client already exists
+            client_exists = False
+            for row_data in all_values[1:]:
+                while len(row_data) < len(headers):
+                    row_data.append('')
+                
+                record = dict(zip(headers, row_data))
+                if record.get('Name', '').strip().lower() == client_name.strip().lower():
+                    client_exists = True
+                    break
+            
+            # Create new client if doesn't exist
+            if not client_exists:
+                new_row = [
+                    client_name,
+                    phone_contact,
+                    '',  # Anamnesis
+                    '',  # Notes
+                    0,   # LTV
+                    '',  # Last_Visit_Date
+                    booking_data['date']  # Next_Reminder - set to booking date
+                ]
+                
+                await clients_ws.append_row(new_row)
+                logger.info(f"Auto-created client card for: {client_name}")
+                
+        except Exception as e:
+            logger.error(f"Failed to ensure client exists: {e}")
+            # Non-critical error, continue with booking anyway
+            pass
+    
     async def add_booking(self, sheet_id: str, booking_data: Dict[str, Any]) -> None:
         """
         Add a future appointment to the Schedule worksheet
+        Also creates client card in Clients worksheet if client doesn't exist
         
         Args:
             sheet_id: User's Google Sheet ID
@@ -579,6 +633,9 @@ class SheetsService:
             
             # Get Schedule worksheet
             schedule_ws = await spreadsheet.worksheet(self.SCHEDULE_SHEET)
+            
+            # Check if client exists in Clients worksheet, create if not
+            await self._ensure_client_exists(spreadsheet, booking_data)
             
             # Prepare row data with strict positioning
             booking_row = [
