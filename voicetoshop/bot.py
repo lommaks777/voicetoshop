@@ -998,11 +998,13 @@ async def handle_client_query(message: Message, processing_msg: Message, transcr
         # Privacy-compliant logging
         logger.info(f"User <TG_ID:{tg_id}> queried client info")
         
-        # Format response
-        response = f"👤 <b>{client_info['name']}</b>\n\n"
+        # Format response - phone contact first for easy copying
+        response = f"👤 <b>{client_info['name']}</b>\n"
         
         if client_info.get('phone_contact'):
-            response += f"📱 <b>Контакт:</b> {client_info['phone_contact']}\n\n"
+            response += f"📱 <code>{client_info['phone_contact']}</code>\n\n"
+        else:
+            response += "\n"
         
         if client_info.get('anamnesis'):
             response += f"🏥 <b>Анамнез:</b>\n{client_info['anamnesis']}\n\n"

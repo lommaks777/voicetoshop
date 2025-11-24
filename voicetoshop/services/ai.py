@@ -576,10 +576,17 @@ Extract:
    - "contacts" for phone numbers or contact information
 3. Content to append
 
+IMPORTANT for phone numbers:
+- Convert spoken numbers to digits
+- "плюс семь девять девять девять" → "+7999"
+- "восемь девятьсот пять" → "8905"
+- Keep formatting symbols: +, -, spaces
+
 Examples:
 - "У Ольги аллергия на мёд" → target_field: "anamnesis", content: "Аллергия на мёд"
 - "Иван просил пожестче" → target_field: "notes", content: "Просил пожестче"
-- "Телефон Анны +7 999 123 45 67" → target_field: "contacts", content: "+7 999 123 45 67"
+- "Телефон Анны плюс семь девять девять девять один два три" → target_field: "contacts", content: "+7999123"
+- "Контакт Марии восемь девятьсот пятьдесят" → target_field: "contacts", content: "8950"
 
 Return data in the specified JSON format."""
                     },
@@ -795,9 +802,12 @@ Return data in the specified JSON format."""
 Extract:
 1. client_name: Full client name (capitalize properly)
 2. phone_contact: Phone number or other contact info (Telegram, Instagram, WhatsApp, etc.)
-   - Normalize phone: convert spoken numbers to digits
-   - "плюс семь один два три" → "+7123..."
+   - CRITICAL: Convert spoken numbers to digits
+   - "плюс семь один два три" → "+7123"
+   - "восемь девятьсот пять" → "8905"
+   - "ноль" / "нолик" → "0"
    - Keep @ for Telegram/Instagram handles
+   - Keep formatting: +, -, spaces
 3. notes: Client preferences, what they like, general information
    - Examples: "Любит массаж лица", "предпочитает утро"
 4. anamnesis: Medical information, health conditions, contraindications
@@ -805,15 +815,18 @@ Extract:
 
 IMPORTANT:
 - Separate medical info (anamnesis) from preferences (notes)
-- Convert spoken phone numbers to digits
+- Convert ALL spoken phone numbers to digits
 - Extract ALL provided information
 
 Examples:
-"Запиши клиента. Имя Полина, телефон +7-123-456-78-90. Любит массаж лица."
-→ client_name: "Полина", phone_contact: "+7-123-456-78-90", notes: "Любит массаж лица", anamnesis: null
+"Запиши клиента. Имя Полина, телефон плюс семь один два три. Любит массаж лица."
+→ client_name: "Полина", phone_contact: "+7123", notes: "Любит массаж лица", anamnesis: null
 
 "Добавь новую клиентку Анна, Instagram @anna_k, аллергия на масла"
 → client_name: "Анна", phone_contact: "Instagram @anna_k", notes: null, anamnesis: "Аллергия на масла"
+
+"Клиент Мария, номер восемь девятьсот пять ноль ноль"
+→ client_name: "Мария", phone_contact: "8950 00", notes: null, anamnesis: null
 
 Return data in the specified JSON format."""
                     },
