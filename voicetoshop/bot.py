@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.enums import ParseMode
 import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -45,6 +45,19 @@ def get_main_menu() -> ReplyKeyboardMarkup:
         [KeyboardButton(text="📅 План на сегодня"), KeyboardButton(text="❓ Помощь")]
     ]
     return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
+
+
+def get_undo_keyboard() -> InlineKeyboardMarkup:
+    """
+    Create inline keyboard with undo help button
+    
+    Returns:
+        InlineKeyboardMarkup with help button
+    """
+    keyboard = [
+        [InlineKeyboardButton(text="❌ Отменить действие", callback_data="show_undo_help")]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
 async def get_user_context(tg_id: int) -> dict:
@@ -483,6 +496,44 @@ async def menu_help(message: Message):
     )
 
 
+@dp.callback_query(F.data == "show_undo_help")
+async def handle_undo_help(callback: CallbackQuery):
+    """Handle undo help button click"""
+    tg_id = callback.from_user.id
+    logger.info(f"User <TG_ID:{tg_id}> requested undo help")
+    
+    # Get user's sheet link
+    context = await get_user_context(tg_id)
+    if not context:
+        await callback.answer("Пожалуйста, зарегистрируйтесь")
+        return
+    
+    sheet_id = context['sheet_id']
+    sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
+    
+    help_message = (
+        "❌ <b>Как отменить действие:</b>\n\n"
+        "Чтобы удалить или исправить запись:\n\n"
+        f"1️⃣ Откройте вашу <a href='{sheet_url}'>таблицу Google Sheets</a>\n\n"
+        "2️⃣ Найдите нужную вкладку:\n"
+        "   • <b>Sessions</b> - для сеансов\n"
+        "   • <b>Schedule</b> - для записей\n"
+        "   • <b>Clients</b> - для информации о клиентах\n\n"
+        "3️⃣ Найдите нужную строку и:\n"
+        "   • Удалите её (ПКМ по номеру строки → Удалить)\n"
+        "   • Или исправьте данные вручную\n\n"
+        "💡 Все изменения сохраняются автоматически!"
+    )
+    
+    # Answer callback and send help message
+    await callback.answer()
+    await callback.message.answer(
+        help_message,
+        parse_mode=ParseMode.HTML,
+        disable_web_page_preview=True
+    )
+
+
 @dp.message(F.text)
 async def handle_text(message: Message):
     """Handle text messages - onboarding URL, city input, or CRM operations"""
@@ -736,7 +787,11 @@ async def handle_session(message: Message, processing_msg: Message, transcriptio
             if session_data.next_appointment_date:
                 response += f"\n🗓️ <b>Следующая запись:</b> {session_data.next_appointment_date}\n"
             
-            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
+            await processing_msg.edit_text(
+                response, 
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_undo_keyboard()
+            )
             
         except PermissionError:
             service_email = Config.get_service_account_email()
@@ -795,7 +850,11 @@ async def handle_client_update(message: Message, processing_msg: Message, transc
             response += f"📖 <b>Раздел:</b> {field_name}\n\n"
             response += f"✅ Добавлено: \"{client_edit_data.content_to_append}\""
             
-            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
+            await processing_msg.edit_text(
+                response, 
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_undo_keyboard()
+            )
             logger.info(f"User <TG_ID:{tg_id}> updated client info")
         else:
             await processing_msg.edit_text(
@@ -885,7 +944,11 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
             if booking_data.notes:
                 response += f"\n📝 <b>Заметка:</b> {booking_data.notes}"
             
-            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
+            await processing_msg.edit_text(
+                response, 
+                parse_mode=ParseMode.HTML,
+                reply_markup=get_undo_keyboard()
+            )
             
         except PermissionError:
             service_email = Config.get_service_account_email()
