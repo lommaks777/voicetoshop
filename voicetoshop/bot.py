@@ -551,8 +551,7 @@ async def process_sheet_url(message: Message):
                 f"✅ Таблица проверена!\n\n"
                 f"В каком городе вы работаете? (Нужно для настройки времени уведомлений)\n\n"
                 f"Примеры: Москва, Санкт-Петербург, Новосибирск",
-                parse_mode=ParseMode.HTML,
-                reply_markup=get_main_menu()
+                parse_mode=ParseMode.HTML
             )
             
             logger.info(f"Sheet validated for TG_ID {tg_id}, awaiting city input")
@@ -608,7 +607,12 @@ async def process_city_input(message: Message):
                 f"Ваша таблица подключена.\n"
                 f"Часовой пояс: {timezone}\n\n"
                 f"Теперь можете отправлять голосовые или текстовые сообщения о сеансах массажа.",
-                parse_mode=ParseMode.HTML,
+                parse_mode=ParseMode.HTML
+            )
+            
+            # Send welcome message with menu
+            await message.answer(
+                "Используйте меню ниже для быстрого доступа к функциям:",
                 reply_markup=get_main_menu()
             )
             
@@ -643,7 +647,7 @@ async def handle_voice(message: Message):
     sheet_id = context['sheet_id']
     
     # Send processing message
-    processing_msg = await message.answer("🎧 Обрабатываю голосовое сообщение...", reply_markup=get_main_menu())
+    processing_msg = await message.answer("🎧 Обрабатываю голосовое сообщение...")
     
     try:
         # Download voice file
@@ -659,7 +663,7 @@ async def handle_voice(message: Message):
             os.remove(voice_path)
         
         if not transcription:
-            await processing_msg.edit_text("🤷‍♂️ Не удалось распознать аудио. Попробуйте еще раз.", reply_markup=get_main_menu())
+            await processing_msg.edit_text("🤷‍♂️ Не удалось распознать аудио. Попробуйте еще раз.")
             return
         
         # Privacy-compliant logging (no transcription content, only length)
@@ -670,7 +674,7 @@ async def handle_voice(message: Message):
             
     except Exception as e:
         logger.error(f"Error processing voice message: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обработки сообщения: {str(e)}", reply_markup=get_main_menu())
+        await processing_msg.edit_text(f"❌ Ошибка обработки сообщения: {str(e)}")
 
 
 async def handle_session(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
@@ -700,8 +704,7 @@ async def handle_session(message: Message, processing_msg: Message, transcriptio
                 "• Имя клиента\n"
                 "• Услугу (например, ШВЗ, массаж спины)\n"
                 "• Цену",
-                parse_mode=ParseMode.HTML,
-                reply_markup=get_main_menu()
+                parse_mode=ParseMode.HTML
             )
             return
         
@@ -733,7 +736,7 @@ async def handle_session(message: Message, processing_msg: Message, transcriptio
             if session_data.next_appointment_date:
                 response += f"\n🗓️ <b>Следующая запись:</b> {session_data.next_appointment_date}\n"
             
-            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML, reply_markup=get_main_menu())
+            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
             
         except PermissionError:
             service_email = Config.get_service_account_email()
@@ -749,13 +752,12 @@ async def handle_session(message: Message, processing_msg: Message, transcriptio
         except Exception as e:
             logger.error(f"Error logging session: {e}")
             await processing_msg.edit_text(
-                f"❌ Ошибка записи в таблицу:\n{str(e)}",
-                reply_markup=get_main_menu()
+                f"❌ Ошибка записи в таблицу:\n{str(e)}"
             )
             
     except Exception as e:
         logger.error(f"Error handling session: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обработки сеанса: {str(e)}", reply_markup=get_main_menu())
+        await processing_msg.edit_text(f"❌ Ошибка обработки сеанса: {str(e)}")
 
 
 async def handle_client_update(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
@@ -768,8 +770,7 @@ async def handle_client_update(message: Message, processing_msg: Message, transc
             await processing_msg.edit_text(
                 "❌ Не удалось извлечь информацию о клиенте.\n\n"
                 "Укажите имя клиента и заметку.",
-                parse_mode=ParseMode.HTML,
-                reply_markup=get_main_menu()
+                parse_mode=ParseMode.HTML
             )
             return
         
@@ -794,17 +795,16 @@ async def handle_client_update(message: Message, processing_msg: Message, transc
             response += f"📖 <b>Раздел:</b> {field_name}\n\n"
             response += f"✅ Добавлено: \"{client_edit_data.content_to_append}\""
             
-            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML, reply_markup=get_main_menu())
+            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
             logger.info(f"User <TG_ID:{tg_id}> updated client info")
         else:
             await processing_msg.edit_text(
-                "❌ Ошибка обновления информации.",
-                reply_markup=get_main_menu()
+                "❌ Ошибка обновления информации."
             )
         
     except Exception as e:
         logger.error(f"Error handling client update: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обновления информации: {str(e)}", reply_markup=get_main_menu())
+        await processing_msg.edit_text(f"❌ Ошибка обновления информации: {str(e)}")
 
 
 async def handle_booking(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
@@ -831,8 +831,7 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
                 "• Имя клиента\n"
                 "• Дату (например, 'завтра', 'во вторник')\n"
                 "• Время (например, '14:00', '3 PM')",
-                parse_mode=ParseMode.HTML,
-                reply_markup=get_main_menu()
+                parse_mode=ParseMode.HTML
             )
             return
         
@@ -886,7 +885,7 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
             if booking_data.notes:
                 response += f"\n📝 <b>Заметка:</b> {booking_data.notes}"
             
-            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML, reply_markup=get_main_menu())
+            await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
             
         except PermissionError:
             service_email = Config.get_service_account_email()
@@ -902,13 +901,12 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
         except Exception as e:
             logger.error(f"Error adding booking: {e}")
             await processing_msg.edit_text(
-                f"❌ Ошибка создания записи:\n{str(e)}",
-                reply_markup=get_main_menu()
+                f"❌ Ошибка создания записи:\n{str(e)}"
             )
             
     except Exception as e:
         logger.error(f"Error handling booking: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка обработки записи: {str(e)}", reply_markup=get_main_menu())
+        await processing_msg.edit_text(f"❌ Ошибка обработки записи: {str(e)}")
 
 
 async def handle_client_query(message: Message, processing_msg: Message, transcription: str, sheet_id: str, tg_id: int):
@@ -921,8 +919,7 @@ async def handle_client_query(message: Message, processing_msg: Message, transcr
             await processing_msg.edit_text(
                 "❌ Не удалось понять запрос.\n\n"
                 "Укажите имя клиента.",
-                parse_mode=ParseMode.HTML,
-                reply_markup=get_main_menu()
+                parse_mode=ParseMode.HTML
             )
             return
         
@@ -930,7 +927,7 @@ async def handle_client_query(message: Message, processing_msg: Message, transcr
         client_info = await sheets_service.get_client(sheet_id, client_query_data.client_name)
         
         if not client_info:
-            await processing_msg.edit_text(f"❌ Клиент '{client_query_data.client_name}' не найден", reply_markup=get_main_menu())
+            await processing_msg.edit_text(f"❌ Клиент '{client_query_data.client_name}' не найден")
             return
         
         # Privacy-compliant logging
@@ -993,11 +990,11 @@ async def handle_client_query(message: Message, processing_msg: Message, transcr
                 response += f"Использована: {client_info['name']}\n"
                 response += f"Если это не та клиентка, уточните запрос."
         
-        await processing_msg.edit_text(response, parse_mode=ParseMode.HTML, reply_markup=get_main_menu())
+        await processing_msg.edit_text(response, parse_mode=ParseMode.HTML)
         
     except Exception as e:
         logger.error(f"Error handling client query: {e}")
-        await processing_msg.edit_text(f"❌ Ошибка получения данных: {str(e)}", reply_markup=get_main_menu())
+        await processing_msg.edit_text(f"❌ Ошибка получения данных: {str(e)}")
 
 
 async def send_morning_briefs():
