@@ -36,14 +36,13 @@ onboarding_sheet_ids = {}  # {tg_id: sheet_id} - temporary storage during onboar
 
 def get_main_menu() -> ReplyKeyboardMarkup:
     """
-    Create persistent main menu keyboard with 4 buttons
+    Create persistent main menu keyboard with 2 buttons
     
     Returns:
         ReplyKeyboardMarkup with main menu buttons
     """
     keyboard = [
-        [KeyboardButton(text="📅 План на сегодня"), KeyboardButton(text="📊 Моя База")],
-        [KeyboardButton(text="❓ Помощь"), KeyboardButton(text="🔄 Начать заново")]
+        [KeyboardButton(text="📅 План на сегодня"), KeyboardButton(text="❓ Помощь")]
     ]
     return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
 
@@ -437,40 +436,14 @@ async def menu_daily_plan(message: Message):
         )
 
 
-@dp.message(F.text == "📊 Моя База")
-async def menu_my_base(message: Message):
-    """Handle 'Моя База' button - send link to user's Google Sheet"""
-    tg_id = message.from_user.id
-    logger.info(f"User <TG_ID:{tg_id}> requested sheet link")
-    
-    # Check if user is registered
-    context = await get_user_context(tg_id)
-    if not context:
-        await message.answer(
-            "❌ Вы не зарегистрированы.\n\n"
-            "Отправьте /start для регистрации.",
-            reply_markup=get_main_menu()
-        )
-        return
-    
-    sheet_id = context['sheet_id']
-    sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
-    
-    await message.answer(
-        f"📊 <b>Ваша База Клиентов</b>\n\n"
-        f"🔗 <a href='{sheet_url}'>Открыть таблицу</a>\n\n"
-        f"Здесь хранятся все данные о клиентах, сеансах и записях.",
-        parse_mode=ParseMode.HTML,
-        reply_markup=get_main_menu(),
-        disable_web_page_preview=True
-    )
-
-
 @dp.message(F.text == "❓ Помощь")
 async def menu_help(message: Message):
-    """Handle 'Помощь' button - send usage instructions"""
+    """Handle 'Помощь' button - send usage instructions and sheet link"""
     tg_id = message.from_user.id
     logger.info(f"User <TG_ID:{tg_id}> requested help")
+    
+    # Check if user is registered to show sheet link
+    context = await get_user_context(tg_id)
     
     help_text = (
         "❓ <b>Как использовать бота</b>\n\n"
@@ -489,26 +462,25 @@ async def menu_help(message: Message):
         "<code>/client Анна Иванова</code>\n\n"
         "<b>🌍 Настройка часового пояса:</b>\n"
         "<code>/set_timezone Москва</code>\n\n"
-        "<b>📅 План на сегодня:</b> Нажмите кнопку ниже\n"
-        "<b>📊 Моя База:</b> Ссылка на вашу таблицу\n\n"
-        "💡 <b>Совет:</b> Говорите естественно, я понимаю контекст!"
     )
+    
+    # Add sheet link if user is registered
+    if context:
+        sheet_id = context['sheet_id']
+        sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}"
+        help_text += (
+            f"<b>📊 Моя База Клиентов:</b>\n"
+            f"🔗 <a href='{sheet_url}'>Открыть таблицу</a>\n\n"
+        )
+    
+    help_text += "💡 <b>Совет:</b> Говорите естественно, я понимаю контекст!"
     
     await message.answer(
         help_text,
         parse_mode=ParseMode.HTML,
-        reply_markup=get_main_menu()
+        reply_markup=get_main_menu(),
+        disable_web_page_preview=True
     )
-
-
-@dp.message(F.text == "🔄 Начать заново")
-async def menu_restart(message: Message):
-    """Handle 'Начать заново' button - re-run /start"""
-    tg_id = message.from_user.id
-    logger.info(f"User <TG_ID:{tg_id}> requested restart")
-    
-    # Call the cmd_start function
-    await cmd_start(message)
 
 
 @dp.message(F.text)
