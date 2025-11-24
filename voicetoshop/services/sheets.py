@@ -651,6 +651,15 @@ class SheetsService:
             
             column_name = field_mapping[target_field]
             
+            # Check if column exists, if not add it
+            if column_name not in headers:
+                logger.warning(f"Column '{column_name}' not found in headers, adding it")
+                headers.append(column_name)
+                # Update header row in sheet
+                await clients_ws.update('A1', [headers])
+                # Refresh all_values to include new column
+                all_values = await clients_ws.get_all_values()
+            
             # Find existing client
             existing_row_index = None
             existing_data = None
