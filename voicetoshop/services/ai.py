@@ -873,7 +873,7 @@ Return data in the specified JSON format."""
             return None
     
     @staticmethod
-    async def parse_session(text: str, current_date: str, service_names: List[str] = None, user_current_date: Optional[str] = None) -> Optional[SessionData]:
+    async def parse_session(text: str, current_date: str, service_names: List[str] = None, user_current_date: Optional[str] = None, existing_clients: List[str] = None) -> Optional[SessionData]:
         """
         Parse massage session information from transcribed text
         
@@ -882,6 +882,7 @@ Return data in the specified JSON format."""
             current_date: Server current date in YYYY-MM-DD format (for backward compatibility)
             service_names: List of known service names for matching (optional)
             user_current_date: User's local current date in YYYY-MM-DD format (preferred)
+            existing_clients: List of existing client names for normalization (optional)
             
         Returns:
             SessionData object or None if parsing failed
@@ -895,6 +896,11 @@ Return data in the specified JSON format."""
             if service_names:
                 services_context = f"\n\nKnown services:\n" + "\n".join([f"- {s}" for s in service_names])
             
+            # Create client names context for normalization
+            clients_context = ""
+            if existing_clients:
+                clients_context = f"\n\nExisting clients in database:\n" + "\n".join([f"- {c}" for c in existing_clients])
+            
             response = await client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -902,7 +908,7 @@ Return data in the specified JSON format."""
                         "role": "system",
                         "content": f"""Extract data from a massage therapist's voice note about a completed session.
 
-Today's date is: {reference_date}{services_context}
+Today's date is: {reference_date}{services_context}{clients_context}
 
 CRITICAL DISTINCTION:
 - medical_notes: Medical complaints, pain, health conditions, contraindications
@@ -915,7 +921,11 @@ CRITICAL DISTINCTION:
   Examples: "проработали триггеры", "клиент доволен", "ей понравилось"
 
 RULES:
-- client_name: Extract full name (capitalize properly)
+- client_name: Extract name and MATCH with existing clients list if similar:
+  * "Аня Иванова" → use "Анна Иванова" if it exists in database
+  * "Настя" → use "Анастасия" if found
+  * "Саша" → use "Александр" or "Александра" if found
+  * If no match found, use extracted name as-is (capitalize properly)
 - service_name: Normalize common abbreviations:
   * "ШВЗ" → "Массаж шейно-воротниковой зоны"
   * If matches known service, use exact name from list

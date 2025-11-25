@@ -765,8 +765,11 @@ async def handle_session(message: Message, processing_msg: Message, transcriptio
         # Get service names for context (optional)
         service_names = await sheets_service.get_services(sheet_id)
         
-        # Parse session data with user's local date
-        session_data = await ai_service.parse_session(transcription, user_current_date, service_names, user_current_date)
+        # Get existing client names for normalization (Test 4.1)
+        existing_clients = await sheets_service.get_client_names(sheet_id)
+        
+        # Parse session data with user's local date and existing clients
+        session_data = await ai_service.parse_session(transcription, user_current_date, service_names, user_current_date, existing_clients)
         
         if not session_data:
             await processing_msg.edit_text(

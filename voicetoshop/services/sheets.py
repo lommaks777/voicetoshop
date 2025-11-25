@@ -625,6 +625,43 @@ class SheetsService:
             logger.error(f"Failed to get services: {e}")
             return []
     
+    async def get_client_names(self, sheet_id: str) -> List[str]:
+        """
+        Get list of all client names from Clients worksheet
+        
+        Args:
+            sheet_id: User's Google Sheet ID
+            
+        Returns:
+            List of client names
+        """
+        try:
+            spreadsheet = await self._get_spreadsheet(sheet_id)
+            clients_ws = await spreadsheet.worksheet(self.CLIENTS_SHEET)
+            all_values = await clients_ws.get_all_values()
+            
+            if not all_values or len(all_values) < 2:
+                return []
+            
+            headers = all_values[0]
+            client_names = []
+            
+            for row_data in all_values[1:]:
+                while len(row_data) < len(headers):
+                    row_data.append('')
+                
+                record = dict(zip(headers, row_data))
+                name = record.get('Name', '').strip()
+                if name:
+                    client_names.append(name)
+            
+            logger.info(f"Retrieved {len(client_names)} client names for sheet {sheet_id}")
+            return client_names
+            
+        except Exception as e:
+            logger.error(f"Failed to get client names: {e}")
+            return []
+    
     async def _ensure_client_exists(self, spreadsheet, booking_data: Dict[str, Any]) -> None:
         """
         Check if client exists in Clients worksheet, create if not
