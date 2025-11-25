@@ -732,7 +732,8 @@ async def handle_voice(message: Message):
         if os.path.exists(voice_path):
             os.remove(voice_path)
         
-        if not transcription:
+        # Check if transcription is empty or too short (silence/noise)
+        if not transcription or len(transcription.strip()) < 3:
             await processing_msg.edit_text("🤷‍♂️ Не удалось распознать аудио. Попробуйте еще раз.")
             return
         
