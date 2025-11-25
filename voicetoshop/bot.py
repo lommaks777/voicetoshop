@@ -355,10 +355,20 @@ async def cmd_set_timezone(message: Message):
         
         if success:
             logger.info(f"Sending confirmation message for timezone: {timezone}")
+            # Calculate current time in new timezone
+            try:
+                user_tz = pytz.timezone(timezone)
+                local_time = datetime.now(user_tz)
+                current_time_display = local_time.strftime('%H:%M')
+                current_date_display = local_time.strftime('%d.%m.%Y')
+                time_info = f"\n\n🕔 <b>Сейчас у вас:</b> {current_time_display}, {current_date_display}"
+            except Exception:
+                time_info = ""
+            
             await processing_msg.edit_text(
                 f"✅ <b>Часовой пояс обновлён</b>\n\n"
                 f"🌍 Город: {city}\n"
-                f"⏰ Часовой пояс: {timezone}\n\n"
+                f"⏰ Часовой пояс: {timezone}{time_info}\n\n"
                 f"Утренние уведомления будут приходить в 09:00 по вашему местному времени.",
                 parse_mode=ParseMode.HTML,
                 reply_markup=get_main_menu()
@@ -994,7 +1004,7 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
             logger.warning(f"User <TG_ID:{tg_id}> booking validation failed: missing fields")
             return
         
-        # VALIDATION: Verify date validity (Test 2.3)
+        # VALIDATION: Verify date validity (Test 2.3, Test 4.3)
         try:
             booking_date = datetime.strptime(booking_data.date, '%Y-%m-%d').date()
             user_current_date_obj = datetime.strptime(user_current_date, '%Y-%m-%d').date()
@@ -1008,6 +1018,33 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
                 )
                 logger.warning(f"User <TG_ID:{tg_id}> booking validation failed: past date {booking_data.date}")
                 return
+            
+            # Check if booking is today but time has passed (Test 4.3)
+            if booking_date == user_current_date_obj:
+                # Parse time and compare with current time in user's timezone
+                try:
+                    booking_time_str = booking_data.time
+                    booking_datetime_str = f"{booking_data.date} {booking_time_str}"
+                    booking_datetime = datetime.strptime(booking_datetime_str, '%Y-%m-%d %H:%M')
+                    
+                    # Make booking_datetime timezone-aware in user's timezone
+                    user_tz = pytz.timezone(user_timezone_str)
+                    booking_datetime_aware = user_tz.localize(booking_datetime)
+                    user_now_aware = datetime.now(user_tz)
+                    
+                    if booking_datetime_aware < user_now_aware:
+                        await processing_msg.edit_text(
+                            f"❌ Нельзя создать запись на прошедшее время.\n\n"
+                            f"Сейчас: {user_now_aware.strftime('%H:%M')}\n"
+                            f"Вы указали: {booking_time_str}\n\n"
+                            f"Укажите время в будущем.",
+                            parse_mode=ParseMode.HTML
+                        )
+                        logger.warning(f"User <TG_ID:{tg_id}> booking validation failed: past time {booking_time_str} (now: {user_now_aware.strftime('%H:%M')})")
+                        return
+                except Exception as time_error:
+                    # If time parsing fails, skip this validation but log the error
+                    logger.warning(f"Failed to validate time for same-day booking: {time_error}")
             
             # Check if date is too far in future (2 years limit)
             from datetime import timedelta
