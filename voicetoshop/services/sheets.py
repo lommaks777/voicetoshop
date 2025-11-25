@@ -286,6 +286,13 @@ class SheetsService:
         except PermissionError:
             logger.error(f"Permission denied for sheet {sheet_id}")
             raise
+        except gspread_asyncio.gspread.exceptions.APIError as e:
+            if e.response.status_code == 403:
+                logger.error(f"API Permission denied (403) for sheet {sheet_id}")
+                raise PermissionError("Access to sheet denied. User may have revoked permissions.")
+            else:
+                logger.error(f"Failed to log session: API error {e.response.status_code}")
+                raise
         except Exception as e:
             logger.error(f"Failed to log session: {e}")
             raise
@@ -732,6 +739,13 @@ class SheetsService:
         except PermissionError:
             logger.error(f"Permission denied for sheet {sheet_id}")
             raise
+        except gspread_asyncio.gspread.exceptions.APIError as e:
+            if e.response.status_code == 403:
+                logger.error(f"API Permission denied (403) for sheet {sheet_id}")
+                raise PermissionError("Access to sheet denied. User may have revoked permissions.")
+            else:
+                logger.error(f"Failed to add booking: API error {e.response.status_code}")
+                raise
         except Exception as e:
             logger.error(f"Failed to add booking: {e}")
             raise
@@ -866,6 +880,13 @@ class SheetsService:
         except PermissionError:
             logger.error(f"Permission denied for sheet {sheet_id}")
             raise
+        except gspread_asyncio.gspread.exceptions.APIError as e:
+            if e.response.status_code == 403:
+                logger.error(f"API Permission denied (403) for sheet {sheet_id}")
+                raise PermissionError("Access to sheet denied. User may have revoked permissions.")
+            else:
+                logger.error(f"Failed to update client info: API error {e.response.status_code}")
+                raise
         except Exception as e:
             logger.error(f"Failed to update client info: {e}")
             return {'success': False}
@@ -939,6 +960,13 @@ class SheetsService:
         except PermissionError:
             logger.error(f"Permission denied for sheet {sheet_id}")
             raise
+        except gspread_asyncio.gspread.exceptions.APIError as e:
+            if e.response.status_code == 403:
+                logger.error(f"API Permission denied (403) for sheet {sheet_id}")
+                raise PermissionError("Access to sheet denied. User may have revoked permissions.")
+            else:
+                logger.error(f"Failed to add new client: API error {e.response.status_code}")
+                raise
         except Exception as e:
             logger.error(f"Failed to add new client: {e}")
             return {'success': False, 'error': str(e)}
