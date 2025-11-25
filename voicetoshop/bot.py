@@ -362,17 +362,33 @@ async def cmd_set_timezone(message: Message):
                 current_time_display = local_time.strftime('%H:%M')
                 current_date_display = local_time.strftime('%d.%m.%Y')
                 time_info = f"\n\n🕔 <b>Сейчас у вас:</b> {current_time_display}, {current_date_display}"
-            except Exception:
+            except Exception as time_err:
+                logger.warning(f"Failed to calculate current time in timezone {timezone}: {time_err}")
                 time_info = ""
             
-            await processing_msg.edit_text(
+            confirmation_text = (
                 f"✅ <b>Часовой пояс обновлён</b>\n\n"
                 f"🌍 Город: {city}\n"
                 f"⏰ Часовой пояс: {timezone}{time_info}\n\n"
-                f"Утренние уведомления будут приходить в 09:00 по вашему местному времени.",
-                parse_mode=ParseMode.HTML,
-                reply_markup=get_main_menu()
+                f"Утренние уведомления будут приходить в 09:00 по вашему местному времени."
             )
+            
+            try:
+                await processing_msg.edit_text(
+                    confirmation_text,
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=get_main_menu()
+                )
+                logger.info(f"Successfully edited confirmation message for timezone {timezone}")
+            except Exception as edit_error:
+                # If editing fails, send a new message
+                logger.warning(f"Failed to edit message, sending new: {edit_error}")
+                await message.answer(
+                    confirmation_text,
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=get_main_menu()
+                )
+            
             logger.info(f"User <TG_ID:{tg_id}> updated timezone to {timezone}")
         else:
             logger.error(f"Database update failed for timezone: {timezone}")
