@@ -987,8 +987,11 @@ async def handle_booking(message: Message, processing_msg: Message, transcriptio
             tz = pytz.timezone(Config.TIMEZONE)
             user_current_date = datetime.now(tz).strftime('%Y-%m-%d')
         
-        # Parse booking data with user's local date
-        booking_data = await ai_service.parse_booking(transcription, user_current_date, user_current_date)
+        # Get existing client names for normalization (Test 4.1)
+        existing_clients = await sheets_service.get_client_names(sheet_id)
+        
+        # Parse booking data with user's local date and existing clients
+        booking_data = await ai_service.parse_booking(transcription, user_current_date, user_current_date, existing_clients)
         
         if not booking_data:
             await processing_msg.edit_text(

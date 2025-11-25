@@ -625,7 +625,7 @@ Return data in the specified JSON format."""
             return None
     
     @staticmethod
-    async def parse_booking(text: str, current_date: str, user_current_date: Optional[str] = None) -> Optional[BookingData]:
+    async def parse_booking(text: str, current_date: str, user_current_date: Optional[str] = None, existing_clients: List[str] = None) -> Optional[BookingData]:
         """
         Parse booking/appointment information from transcribed text
         
@@ -633,6 +633,7 @@ Return data in the specified JSON format."""
             text: Transcribed text
             current_date: Server current date in YYYY-MM-DD format (for backward compatibility)
             user_current_date: User's local current date in YYYY-MM-DD format (preferred)
+            existing_clients: List of existing client names for name normalization
             
         Returns:
             BookingData object or None if parsing failed
@@ -640,6 +641,11 @@ Return data in the specified JSON format."""
         try:
             # Use user's local date if provided, otherwise fall back to server date
             reference_date = user_current_date or current_date
+            
+            # Create client names context for normalization
+            clients_context = ""
+            if existing_clients:
+                clients_context = f"\n\nExisting clients in database:\n" + "\n".join([f"- {c}" for c in existing_clients])
             
             # Calculate reference dates for the AI
             tz = pytz.timezone(Config.TIMEZONE)
@@ -653,10 +659,28 @@ Return data in the specified JSON format."""
                         "role": "system",
                         "content": f"""You are a scheduling assistant extracting appointment booking information.
 
-Today is {reference_date} ({weekday}).
+Today is {reference_date} ({weekday}).{clients_context}
 
 Extract:
-1. client_name: Full client name
+1. client_name: **CRITICAL** - ALWAYS check existing clients for nickname/diminutive matches BEFORE using extracted name:
+   * Search for similar names in existing clients list (fuzzy match)
+   * Common Russian diminutives that MUST be matched:
+     - "Аня", "Анюта" → "Анна"
+     - "Настя", "Настюша" → "Анастасия"
+     - "Саша" → "Александр" or "Александра"
+     - "Поля", "Полечка" → "Полина"
+     - "Таня", "Танюша" → "Татьяна"
+     - "Лена", "Ленка" → "Елена"
+     - "Женя" → "Евгений" or "Евгения"
+     - "Катя", "Катюша" → "Екатерина"
+     - "Маша", "Машенька" → "Мария"
+     - "Оля", "Олечка" → "Ольга"
+     - "Вика" → "Виктория"
+     - "Света" → "Светлана"
+     - "Ира" → "Ирина"
+   * If you find a match in existing clients (even partial), USE THE EXISTING NAME
+   * Only if NO similar name exists in database, use extracted name (capitalize properly)
+   * **Example**: User says "Запиши Полю Иванову" and database has "Полина Иванова" → USE "Полина Иванова"
 2. date: Appointment date in YYYY-MM-DD format
    - "tomorrow" → {(today + timedelta(days=1)).strftime('%Y-%m-%d')}
    - "today" → {reference_date}
@@ -921,11 +945,25 @@ CRITICAL DISTINCTION:
   Examples: "проработали триггеры", "клиент доволен", "ей понравилось"
 
 RULES:
-- client_name: Extract name and MATCH with existing clients list if similar:
-  * "Аня Иванова" → use "Анна Иванова" if it exists in database
-  * "Настя" → use "Анастасия" if found
-  * "Саша" → use "Александр" or "Александра" if found
-  * If no match found, use extracted name as-is (capitalize properly)
+- client_name: **CRITICAL** - ALWAYS check existing clients for nickname/diminutive matches BEFORE using extracted name:
+  * Search for similar names in existing clients list (fuzzy match)
+  * Common Russian diminutives that MUST be matched:
+    - "Аня", "Анюта" → "Анна"
+    - "Настя", "Настюша" → "Анастасия"
+    - "Саша" → "Александр" or "Александра"
+    - "Поля", "Полечка" → "Полина"
+    - "Таня", "Танюша" → "Татьяна"
+    - "Лена", "Ленка" → "Елена"
+    - "Женя" → "Евгений" or "Евгения"
+    - "Катя", "Катюша" → "Екатерина"
+    - "Маша", "Машенька" → "Мария"
+    - "Оля", "Олечка" → "Ольга"
+    - "Вика" → "Виктория"
+    - "Света" → "Светлана"
+    - "Ира" → "Ирина"
+  * If you find a match in existing clients (even partial), USE THE EXISTING NAME
+  * Only if NO similar name exists in database, use extracted name (capitalize properly)
+  * **Example**: User says "Запиши Полю Иванову" and database has "Полина Иванова" → USE "Полина Иванова"
 - service_name: Normalize common abbreviations:
   * "ШВЗ" → "Массаж шейно-воротниковой зоны"
   * If matches known service, use exact name from list
